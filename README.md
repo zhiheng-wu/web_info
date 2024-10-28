@@ -11,6 +11,9 @@
 ![image](./others/2.png)
 #### 工具二 pkuseg
 项目地址：https://github.com/lancopku/pkuseg-python
+
+#### 对比
+经过对比，pku的工具效果更好，其“装B”、“港台”可以成功分词，而jieba不太可以
 ### 去除停用词
 使用哈工大停用词表
 对停用词匹配并删除
