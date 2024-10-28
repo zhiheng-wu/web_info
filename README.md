@@ -4,11 +4,11 @@
 ### 分词
 #### 工具一 jieba
 项目地址：https://github.com/fxsjy/jieba?tab=readme-ov-file
-![alt text](./others/1.png)
+![image](./others/1.png)
 
 测试结果，搜索引擎模式最好
 
-![alt text](./others/2.png)
+![image](./others/2.png)
 #### 工具二 pkuseg
 项目地址：https://github.com/lancopku/pkuseg-python
 ### 去除停用词
