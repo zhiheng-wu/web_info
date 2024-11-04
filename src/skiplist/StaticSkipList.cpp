@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 
+
 using namespace std;
 int getNodeCount(int density, int densityMask, int indexBeginfrom1, int size)
 {
@@ -21,6 +22,8 @@ int getNodeCount(int density, int densityMask, int indexBeginfrom1, int size)
 	return ret;
 }
 
+StaticSkipList::StaticSkipList() {}
+
 StaticSkipList::StaticSkipList(int density, const set<int>& s)
 {
 	int size = s.size();
@@ -36,27 +39,29 @@ StaticSkipList::StaticSkipList(int density, const set<int>& s)
 		counts[i] = counts[i - 1] + getNodeCount(density, densityMask, i + 1, size);
 	_list = new Node[counts[size - 1]];
 	_size = counts[size - 1];
+	_entrycount = size;
 	int len = counts[0];
-	sllog("StaticSkipList", "data", 0, "len", counts[0]);
+	int endIdx = len - 1;
+	sllog("StaticSkipList", "data", 0, "len", len);
 	if (1 != size)
 	{
-		_list[0].right = counts[1] - 1;
-		sllog("StaticSkipList", "list", 0, "right", counts[1] - 1);
+		_list[endIdx].right = len;
+		sllog("StaticSkipList", "list", endIdx, "right", len);
 	}
 	else
 	{
-		_list[0].right = 0;
-		sllog("StaticSkipList", "list", 0, "right", 0);
+		_list[endIdx].right = 0;
+		sllog("StaticSkipList", "list", endIdx, "right", 0);
 	}
-	_list[0].setValue(*s.begin());
-	sllog("StaticSkipList", "list", 0, "setDown", *s.begin());
+	_list[endIdx].setValue(*s.begin());
+	sllog("StaticSkipList", "list", endIdx, "setDown", *s.begin());
 	int to = 2;
-	for (int i = 1; i < len; i++, to <<= density)
+	for (int i = len - 2; i >= 0; i--, to <<= density)
 	{
 		_list[i].right = counts[to] - 1;
-		_list[i].down = 0;
+		_list[i].down = endIdx;
 		sllog("StaticSkipList", "list", i, "right", counts[to] - 1);
-		sllog("StaticSkipList", "list", i, "down", 0);
+		sllog("StaticSkipList", "list", i, "down", endIdx);
 	}
 	std::set<int>::const_iterator it = s.begin();
 	it++;
@@ -67,27 +72,28 @@ StaticSkipList::StaticSkipList(int density, const set<int>& s)
 		assert(idx < size);
 		int listIdxBegin = counts[idx - 1];
 		int listNextIdxBegin = counts[idx];
+		int listIdxEnd = listNextIdxBegin - 1;
 		int len = listNextIdxBegin - listIdxBegin;
 		sllog("StaticSkipList", "data", idx, "len", len);
 		int to = 2;
 		if (idx + 1 != size)
 		{
-			sllog("StaticSkipList", "list", listIdxBegin, "right", counts[idx + 1] - 1);
-			_list[listIdxBegin].right = counts[idx + 1] - 1;
+			sllog("StaticSkipList", "list", listIdxEnd, "right", listNextIdxBegin);
+			_list[listIdxEnd].right = listNextIdxBegin;
 		}
 		else
 		{
-			sllog("StaticSkipList", "list", listIdxBegin, "right", 0);
-			_list[listIdxBegin].right = 0;
+			sllog("StaticSkipList", "list", listIdxEnd, "right", 0);
+			_list[listIdxEnd].right = 0;
 		}
-		_list[listIdxBegin].setValue(*it);
-		sllog("StaticSkipList", "list", listIdxBegin, "setDown", *it);
-		for (int i = 1; i < len; i++, to <<= density)
+		_list[listIdxEnd].setValue(*it);
+		sllog("StaticSkipList", "list", listIdxEnd, "setDown", *it);
+		for (int i = len - 2; i >= 0; i--, to <<= density)
 		{
 			_list[listIdxBegin + i].right = counts[idx + to] - 1;
-			_list[listIdxBegin + i].down = listIdxBegin;
+			_list[listIdxBegin + i].down = listIdxEnd;
 			sllog("StaticSkipList", "list", listIdxBegin + i, "right", counts[idx + to] - 1);
-			sllog("StaticSkipList", "list", listIdxBegin + i, "down", listIdxBegin);
+			sllog("StaticSkipList", "list", listIdxBegin + i, "down", listIdxEnd);
 
 		}
 		idx++;
@@ -99,6 +105,86 @@ StaticSkipList::StaticSkipList(int density, const set<int>& s)
 StaticSkipList::~StaticSkipList()
 {
 	delete[] _list;
+}
+
+const StaticSkipList::Node* StaticSkipList::searchForMaxTopNodeNotBiggerThan(int value)const
+{
+	Node* p = &_list[0];
+	int buf = getValue(p);
+	if (buf > value)
+		return nullptr;
+	else if (buf == value)
+		return p;
+	else
+	{
+		Node* tmp = nullptr;
+		Node* record = p;
+		while (1)
+		{
+			while (1)
+			{
+				if (p->right == 0)return record;
+				tmp = &_list[p->right];
+				buf = getValue(tmp);
+				if (buf < value) {
+					p = tmp;
+					record = tmp;
+				}
+				else if (buf == value)return tmp;
+				else break;
+			}
+			if (p->downIsValue())return record;
+			p = &_list[p->down];
+		}
+	}
+}
+
+const StaticSkipList::Node* StaticSkipList::searchForMaxTopNodeNotBiggerThan(int value, const Node* baseNotcmp) const
+{
+	if (baseNotcmp == nullptr)return nullptr;
+	int buf;
+	Node* p = const_cast<Node*>(baseNotcmp);
+	Node* tmp = nullptr;
+	Node* record = nullptr;
+	while (1)
+	{
+		while (1)
+		{
+			if (p->right == 0)return record;
+			tmp = &_list[p->right];
+			buf = getValue(tmp);
+			if (buf < value) {
+				p = tmp;
+				record = tmp;
+			}
+			else if (buf == value)return tmp;
+			else break;
+		}
+		if (p->downIsValue())return record;
+		p = &_list[p->down];
+	}
+}
+
+const StaticSkipList::Node* StaticSkipList::getNext(const Node* base) const
+{
+	if (base == nullptr)return nullptr;
+	if (base->right == 0)
+		return nullptr;
+	if (base->downIsValue())
+		return &_list[base->right];
+	return &_list[_list[base->down].right];
+}
+
+const StaticSkipList::Node* StaticSkipList::getNext() const
+{
+	return &_list[0];
+}
+
+void StaticSkipList::writeToFile(ofstream& stream) const
+{
+	stream.write((const char*)&_entrycount, sizeof(_entrycount));
+	stream.write((const char*)&_size, sizeof(_size));
+	stream.write((const char*)_list, sizeof(Node) * _size);
 }
 
 bool StaticSkipList::Node::downIsValue() const

@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
-void testStaticSkipList();
+void testCreateStaticSkipList();
+void testIterateStaticSkipList();
+void testSearchStaticSkipList();
 #define DEBUGTYPE 0
 #if DEBUGTYPE==1
 template<typename ...T>

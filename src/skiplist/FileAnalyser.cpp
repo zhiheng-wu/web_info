@@ -1,5 +1,6 @@
 #include "FileAnalyser.h"
 #include <string>
+#include "Test.h"
 using namespace std;
 
 FileAnalyser::FileAnalyser(const char* path)
@@ -7,7 +8,7 @@ FileAnalyser::FileAnalyser(const char* path)
 	_state = 0;
 	_isEnd = false;
 	_stream.open(path, ios::in);
-	if (_stream.get() == 'B')
+	if (_stream.get() == L'B')
 		_isBook = true;
 	else
 		_isBook = false;
@@ -30,40 +31,113 @@ FileAnalyser::Node* FileAnalyser::get()
 				count *= 10;
 				count += c - '0';
 			}
-			else if (c == '\'')
+			else if (c == ',')
 			{
 				_state = 1;
 				return new Node{ true,count,string() };
 			}
 			else
 			{
-				_state = 2;
-				return new Node{ true,count,string() };
+				_isEnd = true;
+				_stream.close();
+				return nullptr;
 			}
 			break;
 		case 1:
-			if (c == '\'')
-			{
+			if (c == '"')
 				_state = 2;
-				return new Node{ false,0,buf };
+			else
+				exit(-1);
+			break;
+		case 2:
+			if (c == '{' || c == '[')
+				_state = 3;
+			else
+				exit(-1);
+			break;
+		case 3:
+			if (c == '"')
+				_state = 4;
+			else if (c == '\'')
+				_state = 8;
+			else
+				exit(-1);
+			break;
+		case 4:
+			if (c == '"')
+				_state = 5;
+			else
+				exit(-1);
+			break;
+		case 5:
+			if (c == '"')
+				_state = 6;
+			else
+				buf += c;
+			break;
+		case 6:
+			if (c == '"')
+			{
+				_state = 7;
+				return new Node({ false,0,buf });
 			}
 			else
 			{
+				_state = 5;
+				buf += '"';
 				buf += c;
 			}
 			break;
-		case 2:
+		case 7:
+			if (c == '}')
+				_state = 10;
+			else if (c == ',')
+				_state = 12;
+			else
+				exit(-1);
+			break;
+		case 8:
 			if (c == '\'')
+				_state = 9;
+			else
+				buf += c;
+			break;
+		case 9:
+			if (c == '}' || c == ']')
 			{
-				_state = 1;
+				_state = 10;
+				return new Node({ false,0,buf });
 			}
-			else if (c == '\n')
+			else if (c == ',')
 			{
-				_state = 0;
+				_state = 12;
+				return new Node({ false,0,buf });
+			}
+			{
+				_state = 8;
+				buf += '\'';
+				buf += c;
 			}
 			break;
+		case 10:
+			if (c == '"')
+				_state = 11;
+			else
+				exit(-1);
+			break;
+		case 11:
+			if (c == '\n' || c == '\r')
+				_state = 0;
+			else
+				exit(-1);
+			break;
+		case 12:
+			if (c == ' ')
+				_state = 3;
+			else
+				exit(-1);
+			break;
 		}
-
 		c = _stream.get();
 	}
 	_isEnd = true;

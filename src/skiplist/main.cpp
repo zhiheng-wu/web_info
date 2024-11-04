@@ -84,16 +84,48 @@ map<string, StaticSkipList*>* buildStaticSkipList(const char* path, int density 
 	return ret;
 }
 
+map<string, StaticSkipList*>* buildStaticSkipListForFiles(initializer_list<const char*> paths, int density = 1)
+{
+	map<string, void*>* dataset = new map<string, void*>();
+	map<string, StaticSkipList*>* ret = new map<string, StaticSkipList*>();
+	auto& sr = *ret;
+	for (auto& i : paths)
+		buildPreDataSet(i, *dataset);
+	for (auto& i : *dataset)
+	{
+		set<int>* s = (set<int>*)(i.second);
+		StaticSkipList* l = new StaticSkipList(density, *s);
+		delete s;
+		sr[i.first] = l;
+	}
+	return ret;
+}
+
+#define FILE1 R"(book_processed_by_jieba.csv)"
+#define FILE2 R"(book_processed_by_pkuseg.csv)"
+#define FILE3 R"(movie_processed_by_jieba.csv)"
+#define FILE4 R"(movie_processed_by_pkuseg.csv)"
+#define FILE5 R"(selected_book_top_1200_data_tag.csv)"
+#define FILE6 R"(selected_movie_top_1200_data_tag.csv)"
+#define PATH_ROOT R"(D:\Desktop\web_info\data\)"
+#define SKIP_ROOT R"(skiplist\)"
+#define SKIP_SUFFIX R"(.staticskiplist)"
+#define FILE FILE1
 int main()
 {
-	
-	const char* path = R"(D:\Desktop\web_info\data\book_processed_by_pkuseg.csv)";
-	auto dataset = buildStaticSkipList(path,1);
-	while (1);
+	auto dataset = buildStaticSkipList(PATH_ROOT FILE, 1);
+	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT FILE SKIP_SUFFIX, dataset);
+	//auto dataset = buildStaticSkipListForFiles({ PATH_ROOT FILE2 , PATH_ROOT FILE4 }, 1);
+	//writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT "all_processed_by_pkuseg.csv" SKIP_SUFFIX, dataset);
 	for (auto& i : *dataset)
 	{
 		delete i.second;
 	}
-	delete dataset;
-	//testStaticSkipList();
+	//delete dataset;
+	//dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT FILE SKIP_SUFFIX);
+	//for (auto& i : *dataset)
+	//{
+	//	delete i.second;
+	//}
+	//delete dataset;
 }
