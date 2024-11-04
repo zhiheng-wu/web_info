@@ -134,7 +134,7 @@ const StaticSkipList::Node* StaticSkipList::searchForMaxTopNodeNotBiggerThan(int
 				else break;
 			}
 			if (p->downIsValue())return record;
-			p = &_list[p->down];
+			p++;
 		}
 	}
 }
@@ -161,7 +161,7 @@ const StaticSkipList::Node* StaticSkipList::searchForMaxTopNodeNotBiggerThan(int
 			else break;
 		}
 		if (p->downIsValue())return record;
-		p = &_list[p->down];
+		p++;
 	}
 }
 
