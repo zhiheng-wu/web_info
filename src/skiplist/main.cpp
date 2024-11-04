@@ -1,6 +1,7 @@
 ﻿#include "FileAnalyser.h"
 #include "SkipList.h"
 #include "StaticSkipList.h"
+#include "Test.h"
 #include "TimeCounter.h"
 #include "Util.h"
 #include <cassert>
@@ -85,12 +86,14 @@ map<string, StaticSkipList*>* buildStaticSkipList(const char* path, int density 
 
 int main()
 {
+	
 	const char* path = R"(D:\Desktop\web_info\data\book_processed_by_pkuseg.csv)";
-	auto dataset = buildStaticSkipList(path);
+	auto dataset = buildStaticSkipList(path,1);
 	while (1);
 	for (auto& i : *dataset)
 	{
 		delete i.second;
 	}
 	delete dataset;
+	//testStaticSkipList();
 }
