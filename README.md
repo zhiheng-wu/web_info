@@ -79,13 +79,13 @@ SkipList 一方面浪费很多空间，一方面存储困难，因为指针在�
 
 StaticSkipList 的示例结构为
 
-![alt text](image.png)
+![alt text](others/6.png)
 
 其左上角为节点编号，不实际存储。
 
 StaticSkipList 的实际存储结构为
 
-![alt text](image-1.png)
+![alt text](others/7.png)
 
 不同编号的节点依次排列。
 
