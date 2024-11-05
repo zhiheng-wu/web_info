@@ -3,8 +3,11 @@
 void testCreateStaticSkipList();
 void testIterateStaticSkipList();
 void testSearchStaticSkipList();
-#define DEBUGTYPE 0
-#if DEBUGTYPE==1
+void testCreateStringSkipList();
+void testIterateStringSkipList();
+void testSearchStringSkipList();
+#define DEBUG 0
+#if DEBUG==1
 template<typename ...T>
 void sllog(T... args)
 {
@@ -14,6 +17,6 @@ void sllog(T... args)
 	std::cout << "\n";
 }
 #endif
-#if DEBUGTYPE==0
+#if DEBUG==0
 #define sllog(...) ;
 #endif

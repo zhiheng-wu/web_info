@@ -77,6 +77,7 @@ SkipList 一方面浪费很多空间，一方面存储困难，因为指针在�
 
 ![alt text](others/5.png)
 
+
 StaticSkipList 的示例结构为
 
 ![alt text](others/6.png)
@@ -95,7 +96,7 @@ StaticSkipList 的实际存储结构为
 - 每个节点存储的指针数据替换为数组索引。
 - 每个节点仅拥有两个 int 数据，right 和 down，其中 right 指向右侧节点，down 指向下层节点。
 - 考虑到数组索引和文档索引都是非负数，通过在 down 最高位设置 0 或 1, 能够区分 down 中存储的是数组索引还是数据，故无需额外空间存储数据。考虑到对齐问题，StaticSkipList 每个节点占 8 个字节，而图二 SkipList 占 24 个字节。
-- 严格按照每两个节点设置一个上层节点的方式建表，上图条目 0 实际上缺失了一个节点，正常它应该有 3 个。
+- 严格按照每两个节点设置一个上层节点的方式建表。
 - 删除表中多余的节点，例如图中条目 4 应该有 2 个节点，由于上层节点 right 只能为 0（没有右侧节点了），所以去掉它。整张表仅允许最后一个条目的底层节点 right 这一个 int 为空，其它变量全部拥有值。
 - 每个数组索引都指向其目标条目的顶层节点，在要顺序查询多个值时，这可以用于从上一个值所在地方快速恢复到顶层，这对 AND 查询非常有效。
 - 每个条目从上至下顺序存在数组中。
@@ -106,4 +107,38 @@ StaticSkipList 的实际存储结构为
 
 由于顺序索引存储，索引表可以直接二进制存储到文件中，或同样从文件中读取。在需要查询时，right 所记录的索引偏移直接就是下一个节点所在文件中位置，它在每个条目的查询只需加载本条目的节点和下一个条目的顶层节点。
 
-未完成 **sec2 数据结构仍有优化空间，例如所有的 down 实际上都能换成 value 而非 index, 另外一点是 right, 它仍然有一些冗余值（在两个条目邻接的地方）。也许可以把 r1d1r2d1r3d1r4d1 改成 d1r1r2r3r4。（{right1down1right2down1...}）**
+#### **StringSkipList**
+
+StringSkipList 在空间和访问效率上对 StaticSkipList 进行了优化，它的想法类似于对图一的链表数组化。
+
+首先是 StaticSkipList 的 down 数据，其无论存储索引还是数组，最终目标都是为了获得本节点所在条目的数据。
+
+为此可以每个节点都存储数据，而不存储任何索引，如下图
+
+![alt text](others/8.png)
+
+如此可以在同样空间的情况下极大加快数据查找。
+
+但这样数据就在同一条目的每个节点中存在重复。如果将数据提前到条目的首部，其它节点均只存储其它条目的索引，就得到下图
+
+![alt text](others/9.png)
+
+它就是图 1 数组化的朴素结果。这个表有一个问题，当做 AND 查找，需要遍历该表时，必须得走一个条目的
+所有节点才能到下一个条目。为此可以将每个条目的第一个索引提前，得到 StringSkipList
+
+![alt text](others/10.png)
+
+此时可以方便的查找和遍历。
+
+### 结果对比
+
+||原始数据|StaticSkipList|StringSkipList|
+|---|---|---|---|
+|book_processed_by_jieba|1569KB|2534KB|1980KB|
+|book_processed_by_pkuseg|1540KB|2573KB|2005KB|
+|movie_processed_by_jieba|5665KB|8637KB|6700KB|
+|movie_processed_by_pkuseg|5700KB|8781KB|6815KB|
+|selected_book_top_1200_data_tag|2263KB|2873KB|2332KB|
+|selected_movie_top_1200_data_tag|8781KB|11044KB|8850KB|
+
+由于 SkipList 的索引数据实际上是稀疏的，可以通过压缩显著减低空间占用。

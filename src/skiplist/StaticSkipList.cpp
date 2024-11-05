@@ -1,8 +1,7 @@
 #include "StaticSkipList.h"
 #include "Test.h"
 #include <cassert>
-#include <iostream>
-#include <string>
+#include <fstream>
 
 
 using namespace std;
@@ -40,28 +39,23 @@ StaticSkipList::StaticSkipList(int density, const set<int>& s)
 	_list = new Node[counts[size - 1]];
 	_size = counts[size - 1];
 	_entrycount = size;
+	sllog("staticskiplist", "size", _size, "entry", _entrycount);
 	int len = counts[0];
 	int endIdx = len - 1;
-	sllog("StaticSkipList", "data", 0, "len", len);
 	if (1 != size)
 	{
 		_list[endIdx].right = len;
-		sllog("StaticSkipList", "list", endIdx, "right", len);
 	}
 	else
 	{
 		_list[endIdx].right = 0;
-		sllog("StaticSkipList", "list", endIdx, "right", 0);
 	}
 	_list[endIdx].setValue(*s.begin());
-	sllog("StaticSkipList", "list", endIdx, "setDown", *s.begin());
 	int to = 2;
 	for (int i = len - 2; i >= 0; i--, to <<= density)
 	{
 		_list[i].right = counts[to] - 1;
 		_list[i].down = endIdx;
-		sllog("StaticSkipList", "list", i, "right", counts[to] - 1);
-		sllog("StaticSkipList", "list", i, "down", endIdx);
 	}
 	std::set<int>::const_iterator it = s.begin();
 	it++;
@@ -74,27 +68,20 @@ StaticSkipList::StaticSkipList(int density, const set<int>& s)
 		int listNextIdxBegin = counts[idx];
 		int listIdxEnd = listNextIdxBegin - 1;
 		int len = listNextIdxBegin - listIdxBegin;
-		sllog("StaticSkipList", "data", idx, "len", len);
 		int to = 2;
 		if (idx + 1 != size)
 		{
-			sllog("StaticSkipList", "list", listIdxEnd, "right", listNextIdxBegin);
 			_list[listIdxEnd].right = listNextIdxBegin;
 		}
 		else
 		{
-			sllog("StaticSkipList", "list", listIdxEnd, "right", 0);
 			_list[listIdxEnd].right = 0;
 		}
 		_list[listIdxEnd].setValue(*it);
-		sllog("StaticSkipList", "list", listIdxEnd, "setDown", *it);
 		for (int i = len - 2; i >= 0; i--, to <<= density)
 		{
 			_list[listIdxBegin + i].right = counts[idx + to] - 1;
 			_list[listIdxBegin + i].down = listIdxEnd;
-			sllog("StaticSkipList", "list", listIdxBegin + i, "right", counts[idx + to] - 1);
-			sllog("StaticSkipList", "list", listIdxBegin + i, "down", listIdxEnd);
-
 		}
 		idx++;
 		it++;
@@ -185,6 +172,35 @@ void StaticSkipList::writeToFile(ofstream& stream) const
 	stream.write((const char*)&_entrycount, sizeof(_entrycount));
 	stream.write((const char*)&_size, sizeof(_size));
 	stream.write((const char*)_list, sizeof(Node) * _size);
+}
+
+StaticSkipList* StaticSkipList::readFromFile(std::ifstream& stream)
+{
+	StaticSkipList* s = new StaticSkipList();
+	stream.read((char*)&s->_entrycount, sizeof(_entrycount));
+	stream.read((char*)&s->_size, sizeof(_size));
+	s->_list = new Node[s->_size];
+	stream.read((char*)s->_list, sizeof(Node) * s->_size);
+	return s;
+}
+
+int StaticSkipList::getValue(const Node* node) const
+{
+	if (node == nullptr)
+		return -1;
+	if (node->downIsValue())
+		return node->getValue();
+	else return _list[node->down].getValue();
+}
+
+int StaticSkipList::getSize() const
+{
+	return _size;
+}
+
+int StaticSkipList::getEntryCount() const
+{
+	return _entrycount;
 }
 
 bool StaticSkipList::Node::downIsValue() const

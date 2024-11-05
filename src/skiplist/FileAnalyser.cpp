@@ -1,6 +1,6 @@
 #include "FileAnalyser.h"
 #include <string>
-#include "Test.h"
+#include <fstream>
 using namespace std;
 
 FileAnalyser::FileAnalyser(const char* path)
