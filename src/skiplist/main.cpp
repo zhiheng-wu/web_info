@@ -134,7 +134,7 @@ map<string, StringSkipList*>* buildStringSkipListForFiles(initializer_list<const
 #define FILE4 R"(movie_processed_by_pkuseg.csv)"
 #define FILE5 R"(selected_book_top_1200_data_tag.csv)"
 #define FILE6 R"(selected_movie_top_1200_data_tag.csv)"
-#define PATH_ROOT R"(D:\Desktop\web_info\data\)"
+#define PATH_ROOT R"(..\..\data\)"
 #define SKIP_ROOT R"(skiplist\)"
 #define FILE FILE6
 

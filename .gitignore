@@ -1,2 +1,6 @@
 ./models
 explain_of_web_lab1.pdf
+src/__pycache__
+src/skiplist/.vs
+src/skiplist/x64
+src/skiplist/skiplist
