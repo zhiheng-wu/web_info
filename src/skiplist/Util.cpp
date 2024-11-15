@@ -1,5 +1,6 @@
-#include "Util.h"
+﻿#include "Util.h"
 #include "FileAnalyser.h"
+
 #include <iostream>
 #include <set>
 using namespace std;
@@ -121,3 +122,40 @@ std::map<std::string, StringSkipList*>* ReadStringSkipListFromFile(const char* p
 	return ret;
 }
 
+std::vector<ResultLinkedList*>* makeList(initializer_list<ResultLinkedList*> in)
+{
+	std::vector<ResultLinkedList*>* v = new std::vector<ResultLinkedList*>();
+	v->reserve(in.size());
+	for (auto& i : in)
+	{
+		if (i != nullptr && i->getSize())
+			v->emplace_back(i);
+	}
+	if (v->size())
+		return v;
+	delete v;
+	return nullptr;
+}
+
+std::vector<StringSkipList*>* makeList(initializer_list<StringSkipList*> in)
+{
+	std::vector<StringSkipList*>* v = new std::vector<StringSkipList*>();
+	v->reserve(in.size());
+	for (auto& i : in)
+	{
+		if (i != nullptr && i->getEntryCount())
+			v->emplace_back(i);
+	}
+	if (v->size())
+		return v;
+	delete v;
+	return nullptr;
+}
+
+
+StringSkipList* getListFromMap(std::map<std::string, StringSkipList*>* m, std::string s)
+{
+	if (m->contains(s) == false)
+		return nullptr;
+	return (*m)[s];
+}

@@ -1,4 +1,4 @@
-#include "Test.h"
+﻿#include "Test.h"
 #include "StaticSkipList.h"
 #include "StringSkipList.h"
 #include <set>
@@ -74,7 +74,7 @@ void testIterateStringSkipList()
 		s.insert(i);
 	}
 	auto l = StringSkipList(s);
-	auto p = l.getNext();
+	auto p = l.getFirst();
 	while (p != -1)
 	{
 		cout << l.getValue(p) << endl;

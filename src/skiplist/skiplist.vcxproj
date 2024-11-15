@@ -137,6 +137,8 @@
   <ItemGroup>
     <ClCompile Include="FileAnalyser.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PriorityQueue.cpp" />
+    <ClCompile Include="ResultLinkedList.cpp" />
     <ClCompile Include="skiplist.cpp" />
     <ClCompile Include="StaticSkipList.cpp" />
     <ClCompile Include="StringSkipList.cpp" />
@@ -145,6 +147,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileAnalyser.h" />
+    <ClInclude Include="PriorityQueue.h" />
+    <ClInclude Include="ResultLinkedList.h" />
     <ClInclude Include="SkipList.h" />
     <ClInclude Include="StaticSkipList.h" />
     <ClInclude Include="StringSkipList.h" />

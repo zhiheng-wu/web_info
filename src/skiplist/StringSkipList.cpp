@@ -1,4 +1,4 @@
-#include "StringSkipList.h"
+﻿#include "StringSkipList.h"
 #include "Test.h"
 #include <fstream>
 using namespace std;
@@ -78,6 +78,60 @@ StringSkipList::StringSkipList(const std::set<int>& s)
 	}
 }
 
+StringSkipList::StringSkipList(ResultLinkedList& l)
+{
+	_entryCount = l.getSize();
+	int* entryEndsize = new int[_entryCount];
+	entryEndsize[0] = getNodeCount(1, _entryCount);
+	for (int i = 1; i < _entryCount; i++)
+		entryEndsize[i] = entryEndsize[i - 1] + getNodeCount(i + 1, _entryCount);
+	_size = entryEndsize[_entryCount - 1];
+	_data = new int[_size];
+	auto it = l.getFirst();
+	_data[0] = it->value;
+	int len = entryEndsize[0];
+#ifdef DEBUG
+	if (_entryCount != 1)
+	{
+		sllog("stringskiplist", "size", _size, "entrycount", _entryCount);
+	}
+#endif // DEBUG
+	if (1 != _entryCount)
+		_data[1] = len;
+	else
+		_data[1] = 0;
+	int rightEntryIdx = 2;
+	for (int i = len - 1; i > 1; i--, rightEntryIdx <<= 1)
+	{
+		_data[i] = entryEndsize[rightEntryIdx - 1];
+	}
+	it++;
+	int entryIdx = 1;
+	while (it != nullptr)
+	{
+		int entryBeginIdx = entryEndsize[entryIdx - 1];
+		int entryNextBeginIdx = entryEndsize[entryIdx];
+		int entryEndIdx = entryNextBeginIdx - 1;
+		int len = entryNextBeginIdx - entryBeginIdx;
+		int rightEntryIdxMultiplier = 2;
+		_data[entryBeginIdx] = it->value;
+		if (entryIdx + 1 != _entryCount)
+		{
+			_data[entryBeginIdx + 1] = entryNextBeginIdx;
+		}
+		else
+		{
+			_data[entryBeginIdx + 1] = 0;
+		}
+		for (int i = len - 1; i > 1; i--, rightEntryIdxMultiplier <<= 1)
+		{
+			_data[entryBeginIdx + i] = entryEndsize[entryIdx + rightEntryIdxMultiplier - 1];
+		}
+		it = it->next;
+		entryIdx++;
+	}
+}
+
 int StringSkipList::getValue(int entryBeginIdx)
 {
 	if (entryBeginIdx == -1)return -1;
@@ -86,8 +140,8 @@ int StringSkipList::getValue(int entryBeginIdx)
 
 int StringSkipList::FastSearchForMaxEntryNotBiggerThan(int value, int baseNotcmpIdx) const
 {
+	if (baseNotcmpIdx == -1)return FastSearchForMaxEntryNotBiggerThan(value);
 	if (_data[baseNotcmpIdx] > value)return -1;
-	if (baseNotcmpIdx == -1)return -1;
 	int currentEntryIndex = baseNotcmpIdx;
 	int nextEntryIndex = _data[currentEntryIndex + 1];
 	int rightEntryIndexPointer = currentEntryIndex + 2;
@@ -133,11 +187,9 @@ int StringSkipList::getNext(int baseIdx) const
 	return p;
 }
 
-int StringSkipList::getNext() const
+int StringSkipList::getFirst() const
 {
-	int p = _data[1];
-	if (p == 0)return -1;
-	return p;
+	return 0;
 }
 
 int StringSkipList::getEntryCount() const
@@ -217,3 +269,48 @@ StringSkipList::StringSkipList()
 {
 
 }
+
+int StringSkipList::FastSearchForMaxEntryNotSmallerThan(int value, int BaseIdx, bool cmpBase) const
+{
+	if (cmpBase && _data[BaseIdx] >= value)
+		return BaseIdx;
+	int currentEntryIndex = BaseIdx;
+	int nextEntryIndex = _data[currentEntryIndex + 1];
+	int rightEntryIndexPointer = currentEntryIndex + 2;
+	while (nextEntryIndex != 0)
+	{
+		if (rightEntryIndexPointer == nextEntryIndex)
+		{
+			int nextEntryValue = _data[rightEntryIndexPointer];
+			if (nextEntryValue < value) // to next
+			{
+				currentEntryIndex = rightEntryIndexPointer;
+				nextEntryIndex = _data[rightEntryIndexPointer + 1];
+				rightEntryIndexPointer = rightEntryIndexPointer + 2;
+			}
+			else
+				return rightEntryIndexPointer;
+		}
+		else
+		{
+			int rightEntryIndex = _data[rightEntryIndexPointer];
+			int rightEntryValue = _data[rightEntryIndex];
+			if (rightEntryValue < value) //to right
+			{
+				currentEntryIndex = rightEntryIndex;
+				nextEntryIndex = _data[rightEntryIndex + 1];
+				rightEntryIndexPointer = rightEntryIndex + 2;
+			}
+			else if (rightEntryValue == value)
+				return rightEntryIndex;
+			else
+				rightEntryIndexPointer++; // to down
+		}
+	}
+	int ret = _data[currentEntryIndex + 1];
+	if (ret == 0)return -1;
+	return ret;
+}
+
+
+

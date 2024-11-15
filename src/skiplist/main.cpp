@@ -2,11 +2,13 @@
 #include "SkipList.h"
 #include "StaticSkipList.h"
 #include "StringSkipList.h"
+#include "PriorityQueue.h"
 #include "Util.h"
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+#include <iostream>
 using namespace std;
 map<string, set<int>*>* buildStack(const char* path)
 {
@@ -136,6 +138,7 @@ map<string, StringSkipList*>* buildStringSkipListForFiles(initializer_list<const
 #define FILE6 R"(selected_movie_top_1200_data_tag.csv)"
 #define PATH_ROOT R"(..\..\data\)"
 #define SKIP_ROOT R"(skiplist\)"
+#define STRING_SUFFIX R"(.stringskiplist)"
 #define FILE FILE6
 
 void dataGenStringSkipList()
@@ -237,10 +240,30 @@ void dataGenStaticSkipList()
 }
 
 
+
 int main()
 {
-	dataGenStringSkipList();
-	//auto dataset = buildStringSkipList(PATH_ROOT FILE);
-	//writeStringSkipListToFile(PATH_ROOT SKIP_ROOT FILE SKIP_SUFFIX, dataset);
+	auto dataset = ReadStringSkipListFromFile(PATH_ROOT SKIP_ROOT FILE1 STRING_SUFFIX);
+	// (A OR B) AND C AND NOT D
+	auto key1 = getListFromMap(dataset, "A");
+	auto key2 = getListFromMap(dataset, "B");
+	auto key3 = getListFromMap(dataset, "C");
+	auto key4 = getListFromMap(dataset, "D");
+	auto op1 = makeList({ key1,key2 });
+	if (op1 != nullptr)
+	{
+		auto ores = orOperation(makeList({ key1, key2 }));
+		if (ores->getSize() == 0) {
+
+		}
+	}
+	else
+	{
+		release(dataset);
+	}
+	auto andres = andNotOperation(makeList({ key3 }), makeList({ ores }), key4);
+	delete ores;
+	cout << andres->print();
+	delete andres;
 
 }
