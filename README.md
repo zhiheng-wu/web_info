@@ -146,7 +146,7 @@ StringSkipList 在空间和访问效率上对 StaticSkipList 进行了优化，�
 ## sec3
 ### 所做更新
 
-在SkipList_next 分支，只对SkipList这一文件夹做了提交
+在SkipList_next 分支，只对SkipList这一文件夹做了提交（不是src文件夹里的SkipList，是外面的skiplist文件夹）
 
 主函数为SkipList_process.cpp，运行环境为Visual Studio2022，C++ version：C++20
 
