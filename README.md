@@ -142,3 +142,42 @@ StringSkipList 在空间和访问效率上对 StaticSkipList 进行了优化，�
 |selected_movie_top_1200_data_tag|8781KB|11044KB|8850KB|
 
 由于 SkipList 的索引数据实际上是稀疏的，可以通过压缩显著减低空间占用。
+
+## sec3
+### 所做更新
+
+在SkipList_next 分支，只对SkipList这一文件夹做了提交
+
+主函数为SkipList_process.cpp，运行环境为Visual Studio2022，C++ version：C++20
+
+可下载到本地，双击 .sln工程文件运行程序
+
+### 功能示例
+
+1.输出示例
+
+2.查询单独一个标签并返回相关书籍（或电影）的ID
+
+![image](others/11.png)
+
+3.查询两个标签都满足的相关书籍（或电影）（即A AND B）
+
+![image](others/12.png)
+
+4.查询两个标签至少满足其一的相关书籍（或电影）（即A OR B）
+
+![image](others/13.png)
+
+5.复杂查询
+
+由离散数学 数理逻辑，复杂查询可分为AND，OR，NOT的组合操作（对应合取 $\wedge$ ，析取 $\vee$ ，否定 $\neg$）
+
+可提示用户输入 AND内容 OR内容 以及NOT内容
+
+例如，用户想查询中国当代青春或校园的书籍，但不能出现血腥元素；则可以在AND处输入 中国 当代，在OR处输入 校园 青春，在NOT处输入 血腥
+
+代表(中国&当代)&(青春or校园) but NOT血腥，按照这个逻辑完成对跳表的处理
+
+示例如下：
+
+![image](others/14.png)
