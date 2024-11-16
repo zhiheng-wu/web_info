@@ -78,9 +78,7 @@ SequenceQueue::SequenceQueue(std::list<ResultLinkedList*>* rv)
 		_end = _root + idx;
 		idx++;
 	}
-	std::sort(_root, _root + _size, [](const Node& a, const Node& b)->bool {
-		return a.value <= b.value;
-		});
+	std::sort(_root, _root + _size);
 	for (int i = 1; i < _size; i++)
 	{
 		_root[i - 1].next = _root + i;

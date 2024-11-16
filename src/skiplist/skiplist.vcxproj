@@ -149,6 +149,7 @@
     <ClCompile Include="ResultLinkedList.cpp" />
     <ClCompile Include="StringSkipList.cpp" />
     <ClCompile Include="Test.cpp" />
+    <ClCompile Include="TimeCounter.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +160,7 @@
     <ClInclude Include="ResultLinkedList.h" />
     <ClInclude Include="StringSkipList.h" />
     <ClInclude Include="Test.h" />
+    <ClInclude Include="TimeCounter.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>

@@ -8,10 +8,10 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <pybind11/pybind11.h>
-
+#include "TimeCounter.h"
 #define GEN_PY 1
 #if GEN_PY
+#include <pybind11/pybind11.h>
 namespace py = pybind11;
 
 void* getDataSet(const char* str)
@@ -60,7 +60,7 @@ PYBIND11_MODULE(stringskiplist, m) {
 }
 
 #else
-
+using namespace std;
 
 map<string, set<int>*>* buildStack(const char* path)
 {
@@ -185,6 +185,13 @@ void dataGenStringSkipList()
 
 int main()
 {
+	auto dataset = ReadStringSkipListFromFile(PATH_ROOT SKIP_ROOT FILE4 STRING_SUFFIX);
+	yang::time::TimeCounter counter;
+	counter.Start();
+	string s = search("'A' AND NOT 'E' AND ('C' OR 'D' OR 'F' OR 'E' OR 'G')", dataset);
+	counter.End();
+	cout << s << endl << counter.GetTime().toStdString(1);
+	release(dataset);
 	/*
 	auto dataset = ReadStringSkipListFromFile(PATH_ROOT SKIP_ROOT FILE4 STRING_SUFFIX);
 	// (A OR B) AND C AND NOT D
