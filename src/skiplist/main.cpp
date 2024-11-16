@@ -8,7 +8,60 @@
 #include <string>
 #include <vector>
 #include <iostream>
-using namespace std;
+#include <pybind11/pybind11.h>
+
+#define GEN_PY 1
+#if GEN_PY
+namespace py = pybind11;
+
+void* getDataSet(const char* str)
+{
+	return ReadStringSkipListFromFile(str);
+};
+
+int checkDataSet(void* p)
+{
+	return p != NULL;
+};
+
+void searchInDataSet(const char* input, const char* outputPath, void* dataset)
+{
+	std::ofstream f;
+	f.open(outputPath, std::ios::out);
+	f << search(input, (std::map<std::string, StringSkipList*>*)dataset);
+	f.close();
+};
+
+void releaseDataSet(void* dataset)
+{
+	auto d = (std::map<std::string, StringSkipList*>*)dataset;
+	release(d);
+};
+
+PYBIND11_MODULE(stringskiplist, m) {
+	m.def("getDataSet", &getDataSet, R"pbdoc(
+        Get dataset from file. Parameter(FilePath), Return(DataSet).
+    )pbdoc");
+	m.def("checkDataSet", &checkDataSet, R"pbdoc(
+        Check if dataset is exsit. Parameter(DataSet). Output(Bool)
+    )pbdoc");
+	m.def("searchInDataSet", &searchInDataSet, R"pbdoc(
+        Search input equation in dataset, put output to outputPath. Parameter(Input,OutputPath,DataSet).
+    )pbdoc");
+	m.def("releaseDataSet", &releaseDataSet, R"pbdoc(
+        Release dataset. Parameter(DataSet).
+    )pbdoc");
+
+#ifdef VERSION_INFO
+	m.attr("__version__") = VERSION_INFO;
+#else
+	m.attr("__version__") = "dev";
+#endif
+}
+
+#else
+
+
 map<string, set<int>*>* buildStack(const char* path)
 {
 	map<string, set<int>*>* pdataset = new map<string, set<int>*>();
@@ -128,29 +181,7 @@ void dataGenStringSkipList()
 	release(dataset);
 };
 
-void* getDataSet(const char* str)
-{
-	return ReadStringSkipListFromFile(str);
-};
 
-int checkDataSet(void* p)
-{
-	return p != NULL;
-};
-
-void searchInDataSet(const char* input, const char* outputPath, void* dataset)
-{
-	ofstream f;
-	f.open(outputPath, ios::out);
-	f << search(input, (std::map<std::string, StringSkipList*>*)dataset);
-	f.close();
-};
-
-void releaseDataSet(void* dataset)
-{
-	auto d = (std::map<std::string, StringSkipList*>*)dataset;
-	release(d);
-};
 
 int main()
 {
@@ -167,3 +198,4 @@ int main()
 	delete v;
 	release(dataset);*/
 }
+#endif

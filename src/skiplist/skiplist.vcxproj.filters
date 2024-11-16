@@ -69,4 +69,8 @@
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="setup.py" />
+    <None Include="pyproject.toml" />
+  </ItemGroup>
 </Project>

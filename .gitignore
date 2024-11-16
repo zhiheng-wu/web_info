@@ -4,3 +4,5 @@ src/__pycache__
 src/skiplist/.vs
 src/skiplist/x64
 src/skiplist/skiplist
+src/skiplist_py/.vs
+src/skiplist_py/x64
