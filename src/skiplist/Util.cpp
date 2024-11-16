@@ -71,6 +71,7 @@ std::map<std::string, StringSkipList*>* ReadStringSkipListFromFile(const char* p
 		stream.read((char*)&bufsize, sizeof(bufsize));
 	}
 	stream.close();
+	delete[] buffer;
 	return ret;
 }
 

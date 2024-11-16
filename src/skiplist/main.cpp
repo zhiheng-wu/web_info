@@ -185,13 +185,19 @@ void dataGenStringSkipList()
 
 int main()
 {
-	auto dataset = ReadStringSkipListFromFile(PATH_ROOT SKIP_ROOT FILE4 STRING_SUFFIX);
-	yang::time::TimeCounter counter;
-	counter.Start();
-	string s = search("'A' AND NOT 'E' AND ('C' OR 'D' OR 'F' OR 'E' OR 'G')", dataset);
-	counter.End();
-	cout << s << endl << counter.GetTime().toStdString(1);
-	release(dataset);
+	for(int i = 0;i<10;i++)
+	{
+		system("pause");
+		{
+			auto dataset = ReadStringSkipListFromFile(PATH_ROOT SKIP_ROOT FILE4 STRING_SUFFIX);
+			yang::time::TimeCounter counter;
+			counter.Start();
+			string s = search("'A' AND NOT 'E' AND ('C' OR 'D' OR 'F' OR 'E' OR 'G')", dataset);
+			counter.End();
+			cout << s << endl << counter.GetTime().toStdString(1);
+			release(dataset);
+		}
+	}
 	/*
 	auto dataset = ReadStringSkipListFromFile(PATH_ROOT SKIP_ROOT FILE4 STRING_SUFFIX);
 	// (A OR B) AND C AND NOT D

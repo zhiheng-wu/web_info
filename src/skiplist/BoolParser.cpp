@@ -3,6 +3,19 @@
 #include <set>
 using namespace std;
 
+class ASTNode {
+public:
+	const static short TYPE;
+	virtual short getType() = 0;
+	virtual bool visit(std::map<std::string, StringSkipList*>* dataset, std::list<ResultLinkedList*>*& rv, std::list<StringSkipList*>*& sv) = 0;
+	virtual ~ASTNode()
+	{
+
+	}
+};
+
+ASTNode* parse(std::string s);
+
 enum STATE {
 	S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15
 };
@@ -259,6 +272,7 @@ ASTNode* parse(std::string str)
 		}
 		else if (a.type == a.ACC && s.size() == 3)
 		{
+			delete np;
 			delete s.top();
 			s.pop();
 			ParserNode* target = s.top();
