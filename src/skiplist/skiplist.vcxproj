@@ -135,22 +135,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BoolAnalyser.cpp" />
+    <ClCompile Include="BoolParser.cpp" />
     <ClCompile Include="FileAnalyser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PriorityQueue.cpp" />
     <ClCompile Include="ResultLinkedList.cpp" />
-    <ClCompile Include="skiplist.cpp" />
-    <ClCompile Include="StaticSkipList.cpp" />
     <ClCompile Include="StringSkipList.cpp" />
     <ClCompile Include="Test.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BoolAnalyser.h" />
+    <ClInclude Include="BoolParser.h" />
     <ClInclude Include="FileAnalyser.h" />
     <ClInclude Include="PriorityQueue.h" />
     <ClInclude Include="ResultLinkedList.h" />
-    <ClInclude Include="SkipList.h" />
-    <ClInclude Include="StaticSkipList.h" />
     <ClInclude Include="StringSkipList.h" />
     <ClInclude Include="Test.h" />
     <ClInclude Include="Util.h" />

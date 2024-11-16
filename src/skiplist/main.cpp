@@ -1,9 +1,8 @@
 ﻿#include "FileAnalyser.h"
-#include "SkipList.h"
-#include "StaticSkipList.h"
 #include "StringSkipList.h"
 #include "PriorityQueue.h"
 #include "Util.h"
+#include "BoolParser.h"
 #include <map>
 #include <set>
 #include <string>
@@ -34,66 +33,6 @@ map<string, set<int>*>* buildStack(const char* path)
 		delete node;
 	}
 	return pdataset;
-}
-
-map<string, SkipList*>* buildSkipList(const char* path)
-{
-	map<string, SkipList*>* pdataset = new map<string, SkipList*>();
-	auto& dataset = *pdataset;
-	vector<SkipList*> record;
-	FileAnalyser file(path);
-	FileAnalyser::Node* node = nullptr;
-	int focusID = 0;
-	while ((node = file.get()) != nullptr)
-	{
-		if (node->isID)
-			focusID = node->id;
-		else if (dataset.contains(node->tag))
-		{
-			dataset[node->tag]->insert(focusID);
-		}
-		else
-		{
-			SkipList* n = new SkipList(10, 0.25);
-			n->insert(focusID);
-			dataset[node->tag] = n;
-		}
-		delete node;
-	}
-	return pdataset;
-}
-
-map<string, StaticSkipList*>* buildStaticSkipList(const char* path, int density = 1)
-{
-	map<string, void*>* dataset = new map<string, void*>();
-	map<string, StaticSkipList*>* ret = new map<string, StaticSkipList*>();
-	auto& sr = *ret;
-	buildPreDataSet(path, *dataset);
-	for (auto& i : *dataset)
-	{
-		set<int>* s = (set<int>*)(i.second);
-		StaticSkipList* l = new StaticSkipList(density, *s);
-		delete s;
-		sr[i.first] = l;
-	}
-	return ret;
-}
-
-map<string, StaticSkipList*>* buildStaticSkipListForFiles(initializer_list<const char*> paths, int density = 1)
-{
-	map<string, void*>* dataset = new map<string, void*>();
-	map<string, StaticSkipList*>* ret = new map<string, StaticSkipList*>();
-	auto& sr = *ret;
-	for (auto& i : paths)
-		buildPreDataSet(i, *dataset);
-	for (auto& i : *dataset)
-	{
-		set<int>* s = (set<int>*)(i.second);
-		StaticSkipList* l = new StaticSkipList(density, *s);
-		delete s;
-		sr[i.first] = l;
-	}
-	return ret;
 }
 
 map<string, StringSkipList*>* buildStringSkipList(const char* path)
@@ -128,7 +67,6 @@ map<string, StringSkipList*>* buildStringSkipListForFiles(initializer_list<const
 	}
 	return ret;
 }
-
 
 #define FILE1 R"(book_processed_by_jieba.csv)"
 #define FILE2 R"(book_processed_by_pkuseg.csv)"
@@ -188,82 +126,44 @@ void dataGenStringSkipList()
 	release(dataset);
 	dataset = ReadStringSkipListFromFile(PATH_ROOT SKIP_ROOT "all_given.csv" ".stringskiplist");
 	release(dataset);
-}
+};
 
-void dataGenStaticSkipList()
+void* getDataSet(const char* str)
 {
-	auto dataset = buildStaticSkipList(PATH_ROOT FILE1);
-	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT FILE1 ".staticskiplist", dataset);
-	release(dataset);
-	dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT FILE1 ".staticskiplist");
-	release(dataset);
-	dataset = buildStaticSkipList(PATH_ROOT FILE2);
-	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT FILE2 ".staticskiplist", dataset);
-	release(dataset);
-	dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT FILE2 ".staticskiplist");
-	release(dataset);
-	dataset = buildStaticSkipList(PATH_ROOT FILE3);
-	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT FILE3 ".staticskiplist", dataset);
-	release(dataset);
-	dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT FILE3 ".staticskiplist");
-	release(dataset);
-	dataset = buildStaticSkipList(PATH_ROOT FILE4);
-	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT FILE4 ".staticskiplist", dataset);
-	release(dataset);
-	dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT FILE4 ".staticskiplist");
-	release(dataset);
-	dataset = buildStaticSkipList(PATH_ROOT FILE5);
-	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT FILE5 ".staticskiplist", dataset);
-	release(dataset);
-	dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT FILE5 ".staticskiplist");
-	release(dataset);
-	dataset = buildStaticSkipList(PATH_ROOT FILE6);
-	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT FILE6 ".staticskiplist", dataset);
-	release(dataset);
-	dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT FILE6 ".staticskiplist");
-	release(dataset);
-	dataset = buildStaticSkipListForFiles({ PATH_ROOT FILE1 , PATH_ROOT FILE3 });
-	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT "all_processed_by_jieba.csv" ".staticskiplist", dataset);
-	release(dataset);
-	dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT "all_processed_by_jieba.csv" ".staticskiplist");
-	release(dataset);
-	dataset = buildStaticSkipListForFiles({ PATH_ROOT FILE2 , PATH_ROOT FILE4 });
-	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT "all_processed_by_pkuseg.csv" ".staticskiplist", dataset);
-	release(dataset);
-	dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT "all_processed_by_pkuseg.csv" ".staticskiplist");
-	release(dataset);
-	dataset = buildStaticSkipListForFiles({ PATH_ROOT FILE5 , PATH_ROOT FILE6 });
-	writeStaticSkipListToFile(PATH_ROOT SKIP_ROOT "all_given.csv" ".staticskiplist", dataset);
-	release(dataset);
-	dataset = ReadStaticSkipListFromFile(PATH_ROOT SKIP_ROOT "all_given.csv" ".staticskiplist");
-	release(dataset);
-}
+	return ReadStringSkipListFromFile(str);
+};
 
+int checkDataSet(void* p)
+{
+	return p != NULL;
+};
 
+void searchInDataSet(const char* input, const char* outputPath, void* dataset)
+{
+	ofstream f;
+	f.open(outputPath, ios::out);
+	f << search(input, (std::map<std::string, StringSkipList*>*)dataset);
+	f.close();
+};
+
+void releaseDataSet(void* dataset)
+{
+	auto d = (std::map<std::string, StringSkipList*>*)dataset;
+	release(d);
+};
 
 int main()
 {
-	auto dataset = ReadStringSkipListFromFile(PATH_ROOT SKIP_ROOT FILE1 STRING_SUFFIX);
+	/*
+	auto dataset = ReadStringSkipListFromFile(PATH_ROOT SKIP_ROOT FILE4 STRING_SUFFIX);
 	// (A OR B) AND C AND NOT D
-	auto key1 = getListFromMap(dataset, "A");
-	auto key2 = getListFromMap(dataset, "B");
-	auto key3 = getListFromMap(dataset, "C");
-	auto key4 = getListFromMap(dataset, "D");
-	auto op1 = makeList({ key1,key2 });
-	if (op1 != nullptr)
-	{
-		auto ores = orOperation(makeList({ key1, key2 }));
-		if (ores->getSize() == 0) {
-
-		}
-	}
-	else
-	{
-		release(dataset);
-	}
-	auto andres = andNotOperation(makeList({ key3 }), makeList({ ores }), key4);
-	delete ores;
-	cout << andres->print();
-	delete andres;
-
+	string a, b;
+	cin >> a;
+	cin >> b;
+	auto key1 = getListFromMap(dataset, a);
+	auto key2 = getListFromMap(dataset, b);
+	auto v = andOperation(makeList({ key1, key2 }));
+	cout << v->print();
+	delete v;
+	release(dataset);*/
 }

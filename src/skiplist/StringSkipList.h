@@ -3,16 +3,22 @@
 #include <set>
 #include <fstream>
 #include <vector>
+#include <list>
 class StringSkipList
 {
 	friend class SequenceQueue;
 	friend class PriorityQueue;
-	friend ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, StringSkipList* notlist);
-	friend ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, StringSkipList* notlist);
-	friend ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv, StringSkipList* notlist);
-	friend ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, ResultLinkedList* notlist);
-	friend ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, ResultLinkedList* notlist);
-	friend ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv, ResultLinkedList* notlist);
+	friend ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, StringSkipList* notlist);
+	friend ResultLinkedList* andNotOperation(std::list<ResultLinkedList*>* rv, StringSkipList* notlist);
+	friend ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv, StringSkipList* notlist);
+	friend ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, ResultLinkedList* notlist);
+	friend ResultLinkedList* andNotOperation(std::list<ResultLinkedList*>* rv, ResultLinkedList* notlist);
+	friend ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv, ResultLinkedList* notlist);
+	friend ResultLinkedList* notOperation(StringSkipList* s, StringSkipList* notlist);
+	friend ResultLinkedList* notOperation(ResultLinkedList* r, StringSkipList* notlist);
+	friend ResultLinkedList* notOperation(StringSkipList* s, ResultLinkedList* notlist);
+	friend ResultLinkedList* notOperation(ResultLinkedList* r, ResultLinkedList* notlist);
+
 private:
 	int* _data = nullptr;
 	int _entryCount = 0;

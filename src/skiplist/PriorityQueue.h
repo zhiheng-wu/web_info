@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "StringSkipList.h"
 #include "ResultLinkedList.h"
-#include <vector>
+#include <list>
 #include <cassert>
 #include <algorithm>
 #include <queue>
@@ -24,16 +24,16 @@ class SequenceQueue
 	int _size = 0;
 public:
 	// 用户应该确保 sv 和 rv 存在且其内的索引表中没有空表. SequenceQueue 不负责释放 sv 和 rv
-	SequenceQueue(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv);
+	SequenceQueue(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv);
 	// 用户应该确保 sv 存在且其内的索引表中没有空表. SequenceQueue 不负责释放 sv
-	SequenceQueue(std::vector<StringSkipList*>* sv);
+	SequenceQueue(std::list<StringSkipList*>* sv);
 	// 用户应该确保 rv 存在且其内的索引表中没有空表. SequenceQueue 不负责释放 rv
-	SequenceQueue(std::vector<ResultLinkedList*>* rv);
+	SequenceQueue(std::list<ResultLinkedList*>* rv);
 
 	~SequenceQueue();
 	bool meetSame();
 	bool upgrade();
-	bool upgradeAll();
+	bool upgradeAllButOne();
 	int getValue();
 };
 //用于索引表快速OR操作
@@ -54,36 +54,39 @@ class PriorityQueue {
 	std::priority_queue<Node> _data;
 public:
 	// 用户应该确保 sv 和 rv 存在且其内的索引表中没有空表, size > 0. PriorityQueue 不负责释放 sv 和 rv
-	PriorityQueue(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv);
+	PriorityQueue(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv);
 	// 用户应该确保 sv 存在且其内的索引表中没有空表, size > 0. PriorityQueue 不负责释放 sv
-	PriorityQueue(std::vector<StringSkipList*>* sv);
+	PriorityQueue(std::list<StringSkipList*>* sv);
 	// 用户应该确保 rv 存在且其内的索引表中没有空表, size > 0. PriorityQueue 不负责释放 rv
-	PriorityQueue(std::vector<ResultLinkedList*>* rv);
+	PriorityQueue(std::list<ResultLinkedList*>* rv);
 	bool hasNext();
 	int popValue();
 };
 // 用户应该确保若 sv 存在则其内的索引表中没有空表, 且 sv size > 1. andOperation 负责释放 sv, 返回值可能为空
-ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv);
+ResultLinkedList* andOperation(std::list<StringSkipList*>* sv);
 // 用户应该确保若 rv 存在则其内的索引表中没有空表, 且 rv size > 1. andOperation 负责释放 rv, 返回值可能为空
-ResultLinkedList* andOperation(std::vector<ResultLinkedList*>* rv);
+ResultLinkedList* andOperation(std::list<ResultLinkedList*>* rv);
 // 用户应该确保若 sv 或 rv 存在则其内的索引表中没有空表, 且无论是否存在, 它们合起来都 size > 1. andOperation 负责释放 sv, 返回值可能为空
-ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv);
-// 用户应该确保若 sv 存在则其内的索引表中没有空表, 且 sv size > 1. andOperation 负责释放 sv, 返回值可能为空
-ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, StringSkipList* notlist);
-// 用户应该确保若 rv 存在则其内的索引表中没有空表, 且 rv size > 1. andOperation 负责释放 rv, 返回值可能为空
-ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, StringSkipList* notlist);
-// 用户应该确保若 sv 或 rv 存在则其内的索引表中没有空表, 且无论是否存在, 它们合起来都 size > 1. andOperation 负责释放 sv, 返回值可能为空
-ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv, StringSkipList* notlist);
-// 用户应该确保若 sv 存在则其内的索引表中没有空表, 且 sv size > 1. andOperation 负责释放 sv, 返回值可能为空
-ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, ResultLinkedList* notlist);
-// 用户应该确保若 rv 存在则其内的索引表中没有空表, 且 rv size > 1. andOperation 负责释放 rv, 返回值可能为空
-ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, ResultLinkedList* notlist);
-// 用户应该确保若 sv 或 rv 存在则其内的索引表中没有空表, 且无论是否存在, 它们合起来都 size > 1. andOperation 负责释放 sv, 返回值可能为空
-ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv, ResultLinkedList* notlist);
-// 用户应该确保若 sv 存在则其内的索引表中没有空表. andOperation 负责释放 sv, 返回值可能为空
-ResultLinkedList* orOperation(std::vector<StringSkipList*>* sv);
-// 用户应该确保若 rv 存在则其内的索引表中没有空表. andOperation 负责释放 rv, 返回值可能为空
-ResultLinkedList* orOperation(std::vector<ResultLinkedList*>* rv);
-// 用户应该确保若 sv 或 rv 存在则其内的索引表中没有空表. andOperation 负责释放 sv, 返回值可能为空
-ResultLinkedList* orOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv);
-
+ResultLinkedList* andOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv);
+// 用户应该确保若 sv 存在则其内的索引表中没有空表, 且 sv size > 1. andNotOperation 负责释放 sv, 返回值可能为空
+ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, StringSkipList* notlist);
+// 用户应该确保若 rv 存在则其内的索引表中没有空表, 且 rv size > 1. andNotOperation 负责释放 rv, 返回值可能为空
+ResultLinkedList* andNotOperation(std::list<ResultLinkedList*>* rv, StringSkipList* notlist);
+// 用户应该确保若 sv 或 rv 存在则其内的索引表中没有空表, 且无论是否存在, 它们合起来都 size > 1. andNotOperation 负责释放 sv 和 rv, 返回值可能为空
+ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv, StringSkipList* notlist);
+// 用户应该确保若 sv 存在则其内的索引表中没有空表, 且 sv size > 1. andNotOperation 负责释放 sv, 返回值可能为空
+ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, ResultLinkedList* notlist);
+// 用户应该确保若 rv 存在则其内的索引表中没有空表, 且 rv size > 1. andNotOperation 负责释放 rv, 返回值可能为空
+ResultLinkedList* andNotOperation(std::list<ResultLinkedList*>* rv, ResultLinkedList* notlist);
+// 用户应该确保若 sv 或 rv 存在则其内的索引表中没有空表, 且无论是否存在, 它们合起来都 size > 1. andNotOperation 负责释放 sv 和 rv, 返回值可能为空
+ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv, ResultLinkedList* notlist);
+// 用户应该确保若 sv 存在则其内的索引表中没有空表. orOperation 负责释放 sv, 返回值可能为空
+ResultLinkedList* orOperation(std::list<StringSkipList*>* sv);
+// 用户应该确保若 rv 存在则其内的索引表中没有空表. orOperation 负责释放 rv, 返回值可能为空
+ResultLinkedList* orOperation(std::list<ResultLinkedList*>* rv);
+// 用户应该确保若 sv 或 rv 存在则其内的索引表中没有空表. orOperation 负责释放 sv 和 rv, 返回值可能为空
+ResultLinkedList* orOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv);
+ResultLinkedList* notOperation(StringSkipList* s, StringSkipList* notlist);
+ResultLinkedList* notOperation(ResultLinkedList* r, StringSkipList* notlist);
+ResultLinkedList* notOperation(StringSkipList* s, ResultLinkedList* notlist);
+ResultLinkedList* notOperation(ResultLinkedList* r, ResultLinkedList* notlist);

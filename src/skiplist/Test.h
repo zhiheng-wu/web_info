@@ -1,8 +1,5 @@
-#pragma once
+﻿#pragma once
 #include <iostream>
-void testCreateStaticSkipList();
-void testIterateStaticSkipList();
-void testSearchStaticSkipList();
 void testCreateStringSkipList();
 void testIterateStringSkipList();
 void testSearchStringSkipList();

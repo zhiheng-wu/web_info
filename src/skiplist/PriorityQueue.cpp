@@ -1,6 +1,6 @@
 ﻿#include "PriorityQueue.h"
 
-SequenceQueue::SequenceQueue(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv)
+SequenceQueue::SequenceQueue(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv)
 {
 	_size = sv->size() + rv->size();
 	assert(_size > 1);
@@ -36,7 +36,7 @@ SequenceQueue::SequenceQueue(std::vector<StringSkipList*>* sv, std::vector<Resul
 
 }
 
-SequenceQueue::SequenceQueue(std::vector<StringSkipList*>* sv)
+SequenceQueue::SequenceQueue(std::list<StringSkipList*>* sv)
 {
 	_size = sv->size();
 	assert(_size > 1);
@@ -62,7 +62,7 @@ SequenceQueue::SequenceQueue(std::vector<StringSkipList*>* sv)
 	_valueEnd = _end->value;
 }
 
-SequenceQueue::SequenceQueue(std::vector<ResultLinkedList*>* rv)
+SequenceQueue::SequenceQueue(std::list<ResultLinkedList*>* rv)
 {
 	_size = rv->size();
 	assert(_size > 1);
@@ -145,9 +145,9 @@ bool SequenceQueue::upgrade()
 	return true;
 }
 
-bool SequenceQueue::upgradeAll()
+bool SequenceQueue::upgradeAllButOne()
 {
-	for (int i = 0; i < _size; i++)
+	for (int i = 1; i < _size; i++)
 	{
 		if (upgrade() == false)return false;
 	}
@@ -159,7 +159,7 @@ int SequenceQueue::getValue()
 	return _valueBegin;
 }
 
-PriorityQueue::PriorityQueue(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv)
+PriorityQueue::PriorityQueue(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv)
 {
 	for (auto& i : *sv)
 		_data.push(Node(i->_data[0], 0, i));
@@ -170,13 +170,13 @@ PriorityQueue::PriorityQueue(std::vector<StringSkipList*>* sv, std::vector<Resul
 	}
 }
 
-PriorityQueue::PriorityQueue(std::vector<StringSkipList*>* sv)
+PriorityQueue::PriorityQueue(std::list<StringSkipList*>* sv)
 {
 	for (auto& i : *sv)
 		_data.push(Node(i->_data[0], 0, i));
 }
 
-PriorityQueue::PriorityQueue(std::vector<ResultLinkedList*>* rv)
+PriorityQueue::PriorityQueue(std::list<ResultLinkedList*>* rv)
 {
 	for (auto& i : *rv)
 	{
@@ -232,7 +232,18 @@ PriorityQueue::Node::Node(int v, ResultLinkedList::Node* r)
 	RParent = r;
 }
 
-ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv)
+static void releaseList(std::list<ResultLinkedList*>* r)
+{
+	if (r != nullptr)
+	{
+		for (auto& i : *r)
+			delete i;
+		delete r;
+	}
+}
+
+
+ResultLinkedList* andOperation(std::list<StringSkipList*>* sv)
 {
 	if (sv == nullptr)return nullptr;
 	SequenceQueue qu = SequenceQueue(sv);
@@ -240,7 +251,7 @@ ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv)
 	if (qu.meetSame())
 	{
 		ret->append(qu.getValue());
-		if (qu.upgradeAll() == false) {
+		if (qu.upgradeAllButOne() == false) {
 			delete sv;
 			return ret;
 		}
@@ -250,7 +261,7 @@ ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv)
 		if (qu.meetSame())
 		{
 			ret->append(qu.getValue());
-			if (qu.upgradeAll() == false) break;
+			if (qu.upgradeAllButOne() == false) break;
 		}
 	}
 	delete sv;
@@ -261,7 +272,7 @@ ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv)
 	return ret;
 }
 
-ResultLinkedList* andOperation(std::vector<ResultLinkedList*>* rv)
+ResultLinkedList* andOperation(std::list<ResultLinkedList*>* rv)
 {
 	if (rv == nullptr)return nullptr;
 	SequenceQueue qu = SequenceQueue(rv);
@@ -269,8 +280,8 @@ ResultLinkedList* andOperation(std::vector<ResultLinkedList*>* rv)
 	if (qu.meetSame())
 	{
 		ret->append(qu.getValue());
-		if (qu.upgradeAll() == false) {
-			delete rv;
+		if (qu.upgradeAllButOne() == false) {
+			releaseList(rv);
 			return ret;
 		}
 	}
@@ -279,10 +290,10 @@ ResultLinkedList* andOperation(std::vector<ResultLinkedList*>* rv)
 		if (qu.meetSame())
 		{
 			ret->append(qu.getValue());
-			if (qu.upgradeAll() == false) break;
+			if (qu.upgradeAllButOne() == false) break;
 		}
 	}
-	delete rv;
+	releaseList(rv);
 	if (ret->getSize() == 0) {
 		delete ret;
 		return nullptr;
@@ -290,7 +301,7 @@ ResultLinkedList* andOperation(std::vector<ResultLinkedList*>* rv)
 	return ret;
 }
 
-ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv)
+ResultLinkedList* andOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv)
 {
 	if (sv == nullptr)return andOperation(rv);
 	if (rv == nullptr)return andOperation(sv);
@@ -299,9 +310,9 @@ ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv, std::vector<Res
 	if (qu.meetSame())
 	{
 		ret->append(qu.getValue());
-		if (qu.upgradeAll() == false) {
+		if (qu.upgradeAllButOne() == false) {
 			delete sv;
-			delete rv;
+			releaseList(rv);
 			return ret;
 		}
 	}
@@ -310,11 +321,11 @@ ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv, std::vector<Res
 		if (qu.meetSame())
 		{
 			ret->append(qu.getValue());
-			if (qu.upgradeAll() == false) break;
+			if (qu.upgradeAllButOne() == false) break;
 		}
 	}
 	delete sv;
-	delete rv;
+	releaseList(rv);
 	if (ret->getSize() == 0) {
 		delete ret;
 		return nullptr;
@@ -322,10 +333,15 @@ ResultLinkedList* andOperation(std::vector<StringSkipList*>* sv, std::vector<Res
 	return ret;
 }
 
-ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, StringSkipList* notlist)
+ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, StringSkipList* notlist)
 {
 	if (notlist->getEntryCount() == 0)return andOperation(sv);
 	if (sv == nullptr)return nullptr;
+	if (sv->size() == 1) {
+		auto ret = notOperation(sv->front(), notlist);
+		delete sv;
+		return ret;
+	}
 	SequenceQueue qu = SequenceQueue(sv);
 	ResultLinkedList* ret = new ResultLinkedList();
 	auto p = 0;
@@ -336,14 +352,14 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, StringSkipLi
 		if (p == -1 || v != notlist->_data[p])
 		{
 			ret->append(v);
-			if (qu.upgradeAll() == false)
+			if (qu.upgradeAllButOne() == false)
 			{
 				delete sv;
 				delete ret;
 				return nullptr;
 			}
 		}
-		else if (qu.upgradeAll() == false) {
+		else if (qu.upgradeAllButOne() == false) {
 			delete sv;
 			return ret;
 		}
@@ -357,7 +373,7 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, StringSkipLi
 				p = notlist->FastSearchForMaxEntryNotSmallerThan(v, p);
 			if (p == -1 || v != notlist->_data[p])
 				ret->append(v);
-			if (qu.upgradeAll() == false) break;
+			if (qu.upgradeAllButOne() == false) break;
 		}
 	}
 	delete sv;
@@ -368,10 +384,15 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, StringSkipLi
 	return ret;
 }
 
-ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, StringSkipList* notlist)
+ResultLinkedList* andNotOperation(std::list<ResultLinkedList*>* rv, StringSkipList* notlist)
 {
 	if (notlist->getEntryCount() == 0)return andOperation(rv);
 	if (rv == nullptr)return nullptr;
+	if (rv->size() == 1) {
+		auto ret = notOperation(rv->front(), notlist);
+		releaseList(rv);
+		return ret;
+	}
 	SequenceQueue qu = SequenceQueue(rv);
 	ResultLinkedList* ret = new ResultLinkedList();
 	auto p = 0;
@@ -382,15 +403,15 @@ ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, StringSkip
 		if (p == -1 || v != notlist->_data[p])
 		{
 			ret->append(v);
-			if (qu.upgradeAll() == false)
+			if (qu.upgradeAllButOne() == false)
 			{
-				delete rv;
+				releaseList(rv);
 				delete ret;
 				return nullptr;
 			}
 		}
-		else if (qu.upgradeAll() == false) {
-			delete rv;
+		else if (qu.upgradeAllButOne() == false) {
+			releaseList(rv);
 			return ret;
 		}
 	}
@@ -403,10 +424,10 @@ ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, StringSkip
 				p = notlist->FastSearchForMaxEntryNotSmallerThan(v, p);
 			if (p == -1 || v != notlist->_data[p])
 				ret->append(v);
-			if (qu.upgradeAll() == false) break;
+			if (qu.upgradeAllButOne() == false) break;
 		}
 	}
-	delete rv;
+	releaseList(rv);
 	if (ret->getSize() == 0) {
 		delete ret;
 		return nullptr;
@@ -414,7 +435,7 @@ ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, StringSkip
 	return ret;
 }
 
-ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv, StringSkipList* notlist)
+ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv, StringSkipList* notlist)
 {
 	if (notlist->getEntryCount() == 0)return andOperation(sv, rv);
 	if (sv == nullptr)return andNotOperation(rv, notlist);
@@ -429,16 +450,16 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<
 		if (p == -1 || v != notlist->_data[p])
 		{
 			ret->append(v);
-			if (qu.upgradeAll() == false)
+			if (qu.upgradeAllButOne() == false)
 			{
-				delete rv;
+				releaseList(rv);
 				delete sv;
 				delete ret;
 				return nullptr;
 			}
 		}
-		else if (qu.upgradeAll() == false) {
-			delete rv;
+		else if (qu.upgradeAllButOne() == false) {
+			releaseList(rv);
 			delete sv;
 			return ret;
 		}
@@ -452,11 +473,11 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<
 				p = notlist->FastSearchForMaxEntryNotSmallerThan(v, p);
 			if (p == -1 || v != notlist->_data[p])
 				ret->append(v);
-			if (qu.upgradeAll() == false) break;
+			if (qu.upgradeAllButOne() == false) break;
 		}
 	}
 	delete sv;
-	delete rv;
+	releaseList(rv);
 	if (ret->getSize() == 0) {
 		delete ret;
 		return nullptr;
@@ -464,10 +485,15 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<
 	return ret;
 }
 
-ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, ResultLinkedList* notlist)
+ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, ResultLinkedList* notlist)
 {
 	if (notlist->getSize() == 0)return andOperation(sv);
 	if (sv == nullptr)return nullptr;
+	if (sv->size() == 1) {
+		auto ret = notOperation(sv->front(), notlist);
+		delete sv;
+		return ret;
+	}
 	SequenceQueue qu = SequenceQueue(sv);
 	ResultLinkedList* ret = new ResultLinkedList();
 	auto p = notlist->getFirst();
@@ -481,14 +507,14 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, ResultLinked
 		if (p == nullptr || v != p->value)
 		{
 			ret->append(v);
-			if (qu.upgradeAll() == false)
+			if (qu.upgradeAllButOne() == false)
 			{
 				delete sv;
 				delete ret;
 				return nullptr;
 			}
 		}
-		else if (qu.upgradeAll() == false) {
+		else if (qu.upgradeAllButOne() == false) {
 			delete sv;
 			return ret;
 		}
@@ -504,7 +530,7 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, ResultLinked
 			}
 			if (p == nullptr || v != p->value)
 				ret->append(v);
-			if (qu.upgradeAll() == false) break;
+			if (qu.upgradeAllButOne() == false) break;
 		}
 	}
 	delete sv;
@@ -515,10 +541,15 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, ResultLinked
 	return ret;
 }
 
-ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, ResultLinkedList* notlist)
+ResultLinkedList* andNotOperation(std::list<ResultLinkedList*>* rv, ResultLinkedList* notlist)
 {
 	if (notlist->getSize() == 0)return andOperation(rv);
 	if (rv == nullptr)return nullptr;
+	if (rv->size() == 1) {
+		auto ret = notOperation(rv->front(), notlist);
+		releaseList(rv);
+		return ret;
+	}
 	SequenceQueue qu = SequenceQueue(rv);
 	ResultLinkedList* ret = new ResultLinkedList();
 	auto p = notlist->getFirst();
@@ -532,15 +563,15 @@ ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, ResultLink
 		if (p == nullptr || v != p->value)
 		{
 			ret->append(v);
-			if (qu.upgradeAll() == false)
+			if (qu.upgradeAllButOne() == false)
 			{
-				delete rv;
+				releaseList(rv);
 				delete ret;
 				return nullptr;
 			}
 		}
-		else if (qu.upgradeAll() == false) {
-			delete rv;
+		else if (qu.upgradeAllButOne() == false) {
+			releaseList(rv);
 			return ret;
 		}
 	}
@@ -555,10 +586,10 @@ ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, ResultLink
 			}
 			if (p == nullptr || v != p->value)
 				ret->append(v);
-			if (qu.upgradeAll() == false) break;
+			if (qu.upgradeAllButOne() == false) break;
 		}
 	}
-	delete rv;
+	releaseList(rv);
 	if (ret->getSize() == 0) {
 		delete ret;
 		return nullptr;
@@ -566,7 +597,7 @@ ResultLinkedList* andNotOperation(std::vector<ResultLinkedList*>* rv, ResultLink
 	return ret;
 }
 
-ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv, ResultLinkedList* notlist)
+ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv, ResultLinkedList* notlist)
 {
 	if (notlist->getSize() == 0)return andOperation(sv, rv);
 	if (sv == nullptr)return andNotOperation(rv, notlist);
@@ -584,16 +615,16 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<
 		if (p == nullptr || v != p->value)
 		{
 			ret->append(v);
-			if (qu.upgradeAll() == false)
+			if (qu.upgradeAllButOne() == false)
 			{
-				delete rv;
+				releaseList(rv);
 				delete sv;
 				delete ret;
 				return nullptr;
 			}
 		}
-		else if (qu.upgradeAll() == false) {
-			delete rv;
+		else if (qu.upgradeAllButOne() == false) {
+			releaseList(rv);
 			delete sv;
 			return ret;
 		}
@@ -609,11 +640,11 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<
 			}
 			if (p == nullptr || v != p->value)
 				ret->append(v);
-			if (qu.upgradeAll() == false) break;
+			if (qu.upgradeAllButOne() == false) break;
 		}
 	}
 	delete sv;
-	delete rv;
+	releaseList(rv);
 	if (ret->getSize() == 0) {
 		delete ret;
 		return nullptr;
@@ -621,14 +652,20 @@ ResultLinkedList* andNotOperation(std::vector<StringSkipList*>* sv, std::vector<
 	return ret;
 }
 
-ResultLinkedList* orOperation(std::vector<StringSkipList*>* sv)
+ResultLinkedList* orOperation(std::list<StringSkipList*>* sv)
 {
 	if (sv == nullptr)return nullptr;
 	PriorityQueue qu = PriorityQueue(sv);
 	ResultLinkedList* ret = new ResultLinkedList();
+	int m = -1;
 	while (qu.hasNext())
 	{
-		ret->append(qu.popValue());
+		int n = qu.popValue();
+		if (n != m)
+		{
+			ret->append(n);
+			m = n;
+		}
 	}
 	delete sv;
 	if (ret->getSize() == 0) {
@@ -638,16 +675,22 @@ ResultLinkedList* orOperation(std::vector<StringSkipList*>* sv)
 	return ret;
 }
 
-ResultLinkedList* orOperation(std::vector<ResultLinkedList*>* rv)
+ResultLinkedList* orOperation(std::list<ResultLinkedList*>* rv)
 {
 	if (rv == nullptr)return nullptr;
 	PriorityQueue qu = PriorityQueue(rv);
 	ResultLinkedList* ret = new ResultLinkedList();
+	int m = -1;
 	while (qu.hasNext())
 	{
-		ret->append(qu.popValue());
+		int n = qu.popValue();
+		if (n != m)
+		{
+			ret->append(n);
+			m = n;
+		}
 	}
-	delete rv;
+	releaseList(rv);
 	if (ret->getSize() == 0) {
 		delete ret;
 		return nullptr;
@@ -655,20 +698,138 @@ ResultLinkedList* orOperation(std::vector<ResultLinkedList*>* rv)
 	return ret;
 }
 
-ResultLinkedList* orOperation(std::vector<StringSkipList*>* sv, std::vector<ResultLinkedList*>* rv)
+ResultLinkedList* orOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv)
 {
 	if (sv == nullptr)return orOperation(rv);
 	if (rv == nullptr)return orOperation(sv);
 	PriorityQueue qu = PriorityQueue(sv, rv);
 	ResultLinkedList* ret = new ResultLinkedList();
+	int m = -1;
 	while (qu.hasNext())
 	{
-		ret->append(qu.popValue());
+		int n = qu.popValue();
+		if (n != m)
+		{
+			ret->append(n);
+			m = n;
+		}
 	}
-	delete rv;
+	releaseList(rv);
 	if (ret->getSize() == 0) {
 		delete ret;
 		return nullptr;
 	}
+	return ret;
+}
+
+ResultLinkedList* notOperation(StringSkipList* s, StringSkipList* notlist)
+{
+	if (s == nullptr) return nullptr;
+	ResultLinkedList* ret = new ResultLinkedList();
+	auto p = 0;
+	auto q = 0;
+	do
+	{
+		int v = s->_data[p];
+		q = notlist->FastSearchForMaxEntryNotSmallerThan(v, q);
+		if (q == -1)
+		{
+			do
+			{
+				v = s->_data[p];
+				ret->append(v);
+				p = s->_data[p + 1];
+			} while (p != 0);
+			return ret;
+		}
+		if (notlist->_data[q] != v)
+			ret->append(v);
+		p = s->_data[p + 1];
+	} while (p != 0);
+	return ret;
+}
+
+ResultLinkedList* notOperation(ResultLinkedList* r, StringSkipList* notlist)
+{
+	if (r == nullptr) return nullptr;
+	ResultLinkedList* ret = new ResultLinkedList();
+	auto p = r->getFirst();
+	auto q = 0;
+	do
+	{
+		int v = p->value;
+		q = notlist->FastSearchForMaxEntryNotSmallerThan(v, q);
+		if (q == -1)
+		{
+			do
+			{
+				v = p->value;
+				ret->append(v);
+				p = p->next;
+			} while (p != nullptr);
+			return ret;
+		}
+		if (notlist->_data[q] != v)
+			ret->append(v);
+		p = p->next;
+	} while (p != nullptr);
+	return ret;
+}
+
+ResultLinkedList* notOperation(StringSkipList* s, ResultLinkedList* notlist)
+{
+	if (s == nullptr) return nullptr;
+	ResultLinkedList* ret = new ResultLinkedList();
+	auto p = 0;
+	auto q = notlist->getFirst();
+	do
+	{
+		int v = s->_data[p];
+		while (q->value < v) {
+			q = q->next;
+			if (q == nullptr)
+			{
+				do
+				{
+					v = s->_data[p];
+					ret->append(v);
+					p = s->_data[p + 1];
+				} while (p != 0);
+				return ret;
+			}
+		}
+		if (q->value != v)
+			ret->append(v);
+		p = s->_data[p + 1];
+	} while (p != 0);
+	return ret;
+}
+
+ResultLinkedList* notOperation(ResultLinkedList* r, ResultLinkedList* notlist)
+{
+	if (r == nullptr) return nullptr;
+	ResultLinkedList* ret = new ResultLinkedList();
+	auto p = r->getFirst();
+	auto q = notlist->getFirst();
+	do
+	{
+		int v = p->value;
+		while (q->value < v) {
+			q = q->next;
+			if (q == nullptr)
+			{
+				do
+				{
+					v = p->value;
+					ret->append(v);
+					p = p->next;
+				} while (p != 0);
+				return ret;
+			}
+		}
+		if (q->value != v)
+			ret->append(v);
+		p = p->next;
+	} while (p != 0);
 	return ret;
 }

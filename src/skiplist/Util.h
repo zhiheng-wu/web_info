@@ -4,12 +4,9 @@
 #include <list>
 #include <initializer_list>
 #include "StringSkipList.h"
-#include "StaticSkipList.h"
 #include "ResultLinkedList.h"
 // return new object
 void buildPreDataSet(const char* path, std::map<std::string, void*>& preDataset);
-void writeStaticSkipListToFile(const char* path, std::map<std::string, StaticSkipList*>* s);
-std::map<std::string, StaticSkipList*>* ReadStaticSkipListFromFile(const char* path);
 void writeStringSkipListToFile(const char* path, std::map<std::string, StringSkipList*>* s);
 std::map<std::string, StringSkipList*>* ReadStringSkipListFromFile(const char* path);
 template<typename T>
