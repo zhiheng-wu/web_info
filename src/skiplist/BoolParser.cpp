@@ -8,6 +8,7 @@ public:
 	const static short TYPE;
 	virtual short getType() = 0;
 	virtual bool visit(std::map<std::string, StringSkipList*>* dataset, std::list<ResultLinkedList*>*& rv, std::list<StringSkipList*>*& sv) = 0;
+	virtual bool visit(InvertedIndex* dataset, std::list<ResultLinkedList*>*& rv, std::list<StringSkipList*>*& sv) = 0;
 	virtual ~ASTNode()
 	{
 
@@ -379,6 +380,7 @@ public:
 	ASTNot* notChild = nullptr;
 	~ASTAnd();
 	bool visit(map<string, StringSkipList*>* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv);
+	bool visit(InvertedIndex* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv);
 };
 const short ASTAnd::TYPE = 1;
 
@@ -398,6 +400,10 @@ public:
 	{
 		return child->visit(dataset, rv, sv);
 	}
+	bool visit(InvertedIndex* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv)
+	{
+		return child->visit(dataset, rv, sv);
+	}
 };
 const short ASTNot::TYPE = 2;
 
@@ -412,6 +418,7 @@ public:
 	list<ASTValue*>* rawChilds = nullptr;
 	~ASTOr();
 	bool visit(map<string, StringSkipList*>* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv);
+	bool visit(InvertedIndex* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv);
 };
 const short ASTOr::TYPE = 3;
 
@@ -425,6 +432,7 @@ public:
 	string value;
 	ASTValue(string s);
 	bool visit(map<string, StringSkipList*>* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv);
+	bool visit(InvertedIndex* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv);
 };
 const short ASTValue::TYPE = 4;
 
@@ -991,6 +999,53 @@ std::string search(std::string str, std::map<std::string, StringSkipList*>* data
 	}
 }
 
+std::string search(std::string str, InvertedIndex* dataset)
+{
+	auto node = parse(str);
+	if (node->getType() == ASTNot::TYPE)
+	{
+		delete node;
+		str += "\ninfinite";
+		return str;
+	}
+	list<ResultLinkedList*>* r = nullptr;
+	list<StringSkipList*>* s = nullptr;
+	if (node->visit(dataset, r, s))
+	{
+		delete node;
+		if (r != nullptr)
+		{
+			ResultLinkedList* rl = r->front();
+			delete r;
+			auto p = rl->getFirst();
+			while (p)
+			{
+				str += '\n' + to_string(p->value);
+				p = p->next;
+			}
+			delete rl;
+			return str;
+		}
+		else
+		{
+			StringSkipList* sl = s->front();
+			delete s;
+			auto p = sl->getFirst();
+			while (p != -1)
+			{
+				str += '\n' + to_string(sl->getValue(p));
+				p = sl->getNext(p);
+			}
+			return str;
+		}
+	}
+	else
+	{
+		delete node;
+		return str;
+	}
+}
+
 
 const short ASTNode::TYPE = 0;
 short ASTNode::getType()
@@ -1076,6 +1131,63 @@ NONOTCHILD:;
 	}
 }
 
+bool ASTAnd::visit(InvertedIndex* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv)
+{
+	list<ResultLinkedList*>* r = nullptr;
+	list<StringSkipList*>* s = nullptr;
+	if (rawChilds != nullptr)
+		for (auto& i : *rawChilds)
+		{
+			if (i->visit(dataset, r, s) == false)
+			{
+				releaseList(r);
+				delete s;
+				return false;
+			}
+		}
+	if (orChilds != nullptr)
+		for (auto& i : *orChilds)
+		{
+			if (i->visit(dataset, r, s) == false)
+			{
+				releaseList(r);
+				delete s;
+				return false;
+			}
+		}
+	if (r == nullptr && s == nullptr)return false;
+	if (notChild)
+	{
+		list<ResultLinkedList*>* rn = nullptr;
+		list<StringSkipList*>* sn = nullptr;
+		if (notChild->visit(dataset, rn, sn) == false)goto NONOTCHILD1;
+		ResultLinkedList* rs = nullptr;
+		if (rn)
+			rs = andNotOperation(s, r, rn->front());
+		else
+			rs = andNotOperation(s, r, sn->front());
+		releaseList(rn);
+		delete sn;
+		if (rs == nullptr) return false;
+		rv = AppendToNullableList(rv, rs);
+		return true;
+	}
+NONOTCHILD1:;
+	if (r == nullptr && s != nullptr && s->size() == 1)
+	{
+		sv = AppendToNullableList(sv, s->front());
+		delete s;
+		return true;
+	}
+	else
+	{
+		ResultLinkedList* rs = andOperation(s, r);
+		if (rs == nullptr) return false;
+		rv = AppendToNullableList(rv, rs);
+		return true;
+	}
+}
+
 ASTOr::~ASTOr()
 {
 	if (andChilds)
@@ -1128,6 +1240,38 @@ bool ASTOr::visit(map<string, StringSkipList*>* dataset, list<ResultLinkedList*>
 	return true;
 }
 
+bool ASTOr::visit(InvertedIndex* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv)
+{
+	list<ResultLinkedList*>* r = nullptr;
+	list<StringSkipList*>* s = nullptr;
+	if (rawChilds != nullptr)
+		for (auto& i : *rawChilds)
+		{
+			i->visit(dataset, r, s);
+		}
+	if (andChilds != nullptr)
+		for (auto& i : *andChilds)
+		{
+			i->visit(dataset, r, s);
+		}
+	if (r == nullptr)
+	{
+		if (s == nullptr)
+		{
+			return false;
+		}
+		else if (s->size() == 1)
+		{
+			sv = AppendToNullableList(sv, s->front());
+			delete s;
+			return true;
+		}
+	}
+	ResultLinkedList* rs = orOperation(s, r);
+	rv = AppendToNullableList(rv, rs);
+	return true;
+}
+
 ASTValue::ASTValue(string s)
 {
 	value = s;
@@ -1138,5 +1282,13 @@ bool ASTValue::visit(map<string, StringSkipList*>* dataset, list<ResultLinkedLis
 	auto it = dataset->find(value);
 	if (it == dataset->end()) return false;
 	sv = AppendToNullableList(sv, (*it).second);
+	return true;
+}
+
+bool ASTValue::visit(InvertedIndex* dataset, list<ResultLinkedList*>*& rv, list<StringSkipList*>*& sv)
+{
+	auto it = dataset->contains(value);
+	if (it == -1) return false;
+	sv = AppendToNullableList(sv, (*dataset)[it]);
 	return true;
 }

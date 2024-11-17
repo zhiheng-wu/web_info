@@ -333,7 +333,6 @@ ResultLinkedList* andOperation(std::list<StringSkipList*>* sv, std::list<ResultL
 
 ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, StringSkipList* notlist)
 {
-	if (notlist->getEntryCount() == 0)return andOperation(sv);
 	if (sv == nullptr)return nullptr;
 	if (sv->size() == 1) {
 		auto ret = notOperation(sv->front(), notlist);
@@ -384,7 +383,6 @@ ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, StringSkipList
 
 ResultLinkedList* andNotOperation(std::list<ResultLinkedList*>* rv, StringSkipList* notlist)
 {
-	if (notlist->getEntryCount() == 0)return andOperation(rv);
 	if (rv == nullptr)return nullptr;
 	if (rv->size() == 1) {
 		auto ret = notOperation(rv->front(), notlist);
@@ -435,7 +433,6 @@ ResultLinkedList* andNotOperation(std::list<ResultLinkedList*>* rv, StringSkipLi
 
 ResultLinkedList* andNotOperation(std::list<StringSkipList*>* sv, std::list<ResultLinkedList*>* rv, StringSkipList* notlist)
 {
-	if (notlist->getEntryCount() == 0)return andOperation(sv, rv);
 	if (sv == nullptr)return andNotOperation(rv, notlist);
 	if (rv == nullptr)return andNotOperation(sv, notlist);
 	SequenceQueue qu = SequenceQueue(sv, rv);

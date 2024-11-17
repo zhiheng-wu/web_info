@@ -96,15 +96,13 @@ std::vector<StringSkipList*>* makeList(initializer_list<StringSkipList*> in)
 	v->reserve(in.size());
 	for (auto& i : in)
 	{
-		if (i != nullptr && i->getEntryCount())
-			v->emplace_back(i);
+		if (i != nullptr) v->emplace_back(i);
 	}
 	if (v->size())
 		return v;
 	delete v;
 	return nullptr;
 }
-
 
 StringSkipList* getListFromMap(std::map<std::string, StringSkipList*>* m, std::string s)
 {

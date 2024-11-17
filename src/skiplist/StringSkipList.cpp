@@ -25,7 +25,7 @@ StringSkipList::~StringSkipList()
 
 StringSkipList::StringSkipList(const std::set<int>& s)
 {
-	_entryCount = s.size();
+	int _entryCount = s.size();
 	int* entryEndsize = new int[_entryCount];
 	entryEndsize[0] = getNodeCount(1, _entryCount);
 	for (int i = 1; i < _entryCount; i++)
@@ -80,7 +80,7 @@ StringSkipList::StringSkipList(const std::set<int>& s)
 
 StringSkipList::StringSkipList(ResultLinkedList& l)
 {
-	_entryCount = l.getSize();
+	int _entryCount = l.getSize();
 	int* entryEndsize = new int[_entryCount];
 	entryEndsize[0] = getNodeCount(1, _entryCount);
 	for (int i = 1; i < _entryCount; i++)
@@ -192,11 +192,6 @@ int StringSkipList::getFirst() const
 	return 0;
 }
 
-int StringSkipList::getEntryCount() const
-{
-	return _entryCount;
-}
-
 int StringSkipList::getSize() const
 {
 	return _size;
@@ -204,7 +199,6 @@ int StringSkipList::getSize() const
 
 void StringSkipList::writeToFile(std::ofstream& stream) const
 {
-	stream.write((const char*)&_entryCount, sizeof(_entryCount));
 	stream.write((const char*)&_size, sizeof(_size));
 	stream.write((const char*)_data, sizeof(int) * (_size - 1));
 }
@@ -212,7 +206,6 @@ void StringSkipList::writeToFile(std::ofstream& stream) const
 StringSkipList* StringSkipList::readFromFile(std::ifstream& stream)
 {
 	StringSkipList* s = new StringSkipList();
-	stream.read((char*)&s->_entryCount, sizeof(_entryCount));
 	stream.read((char*)&s->_size, sizeof(_size));
 	s->_data = new int[s->_size];
 	stream.read((char*)s->_data, sizeof(int) * (s->_size - 1));

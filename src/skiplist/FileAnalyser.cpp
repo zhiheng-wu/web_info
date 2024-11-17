@@ -36,7 +36,7 @@ FileAnalyser::Node* FileAnalyser::get()
 				_state = 2;
 			break;
 		case 1:
-			if (c >= '0' && c <= 9)
+			if (c >= '0' && c <= '9')
 			{
 				count *= 10;
 				count += c - '0';

@@ -143,6 +143,7 @@
   <ItemGroup>
     <ClCompile Include="BoolAnalyser.cpp" />
     <ClCompile Include="BoolParser.cpp" />
+    <ClCompile Include="InvertedIndex.cpp" />
     <ClCompile Include="FileAnalyser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PriorityQueue.cpp" />
@@ -155,6 +156,7 @@
   <ItemGroup>
     <ClInclude Include="BoolAnalyser.h" />
     <ClInclude Include="BoolParser.h" />
+    <ClInclude Include="InvertedIndex.h" />
     <ClInclude Include="FileAnalyser.h" />
     <ClInclude Include="PriorityQueue.h" />
     <ClInclude Include="ResultLinkedList.h" />
