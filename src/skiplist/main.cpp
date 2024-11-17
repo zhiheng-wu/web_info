@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include "InvertedIndex.h"
+#include "CompressedInvertedIndex.h"
 #include "TimeCounter.h"
 #define GEN_PY 0
 #if GEN_PY
@@ -130,9 +131,11 @@ map<string, StringSkipList*>* buildStringSkipListForFiles(initializer_list<const
 #define FILEP R"(all_processed_by_pkuseg)"
 #define PATH_ROOT R"(..\..\data\)"
 #define II_ROOT R"(invertedindex\)"
+#define ID_ROOT R"(index\)"
 #define CSV_SUFFIX R"(.csv)"
 #define SKL_SUFFIX R"(.skl)"
 #define II_SUFFIX R"(.ii)"
+#define CII_SUFFIX R"(.cii)"
 
 void* getDataSet(const char* str)
 {
@@ -198,56 +201,126 @@ void dataGenInvertedIndex()
 	InvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILE1 II_SUFFIX);
 	release(skl);
 	auto dataset = InvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE1 II_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILE1 II_SUFFIX);
 	delete dataset;
 	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILE2 SKL_SUFFIX);
 	InvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILE2 II_SUFFIX);
 	release(skl);
 	dataset = InvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE2 II_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILE2 II_SUFFIX);
 	delete dataset;
 	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILE3 SKL_SUFFIX);
 	InvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILE3 II_SUFFIX);
 	release(skl);
 	dataset = InvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE3 II_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILE3 II_SUFFIX);
 	delete dataset;
 	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILE4 SKL_SUFFIX);
 	InvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILE4 II_SUFFIX);
 	release(skl);
 	dataset = InvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE4 II_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILE4 II_SUFFIX);
 	delete dataset;
 	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILEJ SKL_SUFFIX);
 	InvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILEJ II_SUFFIX);
 	release(skl);
 	dataset = InvertedIndex::readFromFile(PATH_ROOT II_ROOT FILEJ II_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILEJ II_SUFFIX);
 	delete dataset;
 	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILEP SKL_SUFFIX);
 	InvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILEP II_SUFFIX);
 	release(skl);
 	dataset = InvertedIndex::readFromFile(PATH_ROOT II_ROOT FILEP II_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILEP II_SUFFIX);
 	delete dataset;
 };
 
-#define SEARCH_TARGET R"(('A' OR 'B'))"
+void dataGenCompressedInvertedIndex()
+{
+
+	auto skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILE1 SKL_SUFFIX);
+	CompressedInvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILE1 CII_SUFFIX);
+	release(skl);
+	auto dataset = CompressedInvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE1 CII_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILE1 CII_SUFFIX);
+	delete dataset;
+	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILE2 SKL_SUFFIX);
+	CompressedInvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILE2 CII_SUFFIX);
+	release(skl);
+	dataset = CompressedInvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE2 CII_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILE2 CII_SUFFIX);
+	delete dataset;
+	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILE3 SKL_SUFFIX);
+	CompressedInvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILE3 CII_SUFFIX);
+	release(skl);
+	dataset = CompressedInvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE3 CII_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILE3 CII_SUFFIX);
+	delete dataset;
+	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILE4 SKL_SUFFIX);
+	CompressedInvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILE4 CII_SUFFIX);
+	release(skl);
+	dataset = CompressedInvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE4 CII_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILE4 CII_SUFFIX);
+	delete dataset;
+	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILEJ SKL_SUFFIX);
+	CompressedInvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILEJ CII_SUFFIX);
+	release(skl);
+	dataset = CompressedInvertedIndex::readFromFile(PATH_ROOT II_ROOT FILEJ CII_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILEJ CII_SUFFIX);
+	delete dataset;
+	skl = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILEP SKL_SUFFIX);
+	CompressedInvertedIndex::writeToFile(skl, PATH_ROOT II_ROOT FILEP CII_SUFFIX);
+	release(skl);
+	dataset = CompressedInvertedIndex::readFromFile(PATH_ROOT II_ROOT FILEP CII_SUFFIX);
+	dataset->writeIndexToFile(PATH_ROOT II_ROOT ID_ROOT FILEP CII_SUFFIX);
+	delete dataset;
+};
+
+#define SEARCH_TARGET R"('A' OR 'B' OR 'C')"
 
 int main()
 {
-	//dataGenInvertedIndex();
+	constexpr int maxsearchcount = 10;
+	dataGenInvertedIndex();
 	{
 		yang::time::TimeCounter t;
 		t.Start();
 		auto dataset = ReadStringSkipListFromFile(PATH_ROOT II_ROOT FILE1 SKL_SUFFIX);
-		string s = search(SEARCH_TARGET, dataset);
+		for (int i = 0; i < maxsearchcount; i++)
+		{
+			for (int j = 0; j < 26; j++)
+				dataset->contains("A" + j);
+		}
 		t.End();
 		release(dataset);
-		cout << t.GetTime().toStdString(1) << endl << s << endl;
+		cout << t.GetTime().toStdString(1) << endl;
 	}
 	{
 		yang::time::TimeCounter t;
 		t.Start();
 		auto dataset = InvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE1 II_SUFFIX);
-		string s = search(SEARCH_TARGET, dataset);
+		for (int i = 0; i < maxsearchcount; i++)
+		{
+			for (int j = 0; j < 26; j++)
+				dataset->contains("A" + j);
+		}
 		t.End();
 		delete dataset;
-		cout << t.GetTime().toStdString(1) << endl << s << endl;
+		cout << t.GetTime().toStdString(1) << endl;
 	}
+	{
+		yang::time::TimeCounter t;
+		t.Start();
+		auto dataset = CompressedInvertedIndex::readFromFile(PATH_ROOT II_ROOT FILE1 CII_SUFFIX);
+		for (int i = 0; i < maxsearchcount; i++)
+		{
+			for (int j = 0; j < 26; j++)
+				dataset->contains("A" + j);
+		}
+		t.End();
+		delete dataset;
+		cout << t.GetTime().toStdString(1) << endl;
+	}
+
 }
 #endif

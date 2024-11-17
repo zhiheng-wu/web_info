@@ -4,6 +4,7 @@
 #include "PriorityQueue.h"
 #include "StringSkipList.h"
 #include "InvertedIndex.h"
+#include "CompressedInvertedIndex.h"
 #include <list>
 #include <map>
 #include <stack>
@@ -20,3 +21,4 @@
 
 std::string search(std::string s, std::map<std::string, StringSkipList*>* dataset);
 std::string search(std::string s, InvertedIndex* dataset);
+std::string search(std::string s, CompressedInvertedIndex* dataset);

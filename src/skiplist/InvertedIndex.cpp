@@ -101,6 +101,17 @@ InvertedIndex::InvertedIndex()
 	listPointerInFile = 0;
 }
 
+void InvertedIndex::writeIndexToFile(const char* path)
+{
+	ofstream ost;
+	ost.open(path, ios::out | ios::binary);
+	ost.write((const char*)&strlen, sizeof(strlen));
+	ost.write((const char*)&indexlen, sizeof(indexlen));
+	ost.write((const char*)indexes, sizeof(char) * indexlen);
+	ost.write((const char*)listPointerInFile, sizeof(int) * indexcount);
+	ost.close();
+}
+
 InvertedIndex* InvertedIndex::readFromFile(const char* path)
 {
 	InvertedIndex* d = new InvertedIndex();

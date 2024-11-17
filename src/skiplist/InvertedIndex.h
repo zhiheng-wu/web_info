@@ -24,6 +24,7 @@ class InvertedIndex
 	//用于 Read 构造
 	InvertedIndex();
 public:
+	void writeIndexToFile(const char* path);
 	// 从 mapData 构建 DataSet, 并写入 File.
 	static void writeToFile(std::map<std::string, StringSkipList*>* mapData, const char* path);
 	~InvertedIndex();
