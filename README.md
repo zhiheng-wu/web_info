@@ -1,4 +1,10 @@
 # web_info
+## 环境
+平台：windows
+python 3.8.20
+![alt text](others/11.png)
+![alt text](others/12.png)
+![alt text](others/13.png)
 ## sec1
 对数据进行处理
 ### 分词
@@ -142,3 +148,10 @@ StringSkipList 在空间和访问效率上对 StaticSkipList 进行了优化，�
 |selected_movie_top_1200_data_tag|8781KB|11044KB|8850KB|
 
 由于 SkipList 的索引数据实际上是稀疏的，可以通过压缩显著减低空间占用。
+
+## 评分数据处理
+模块分离
+get_similarity计算了所有用户的相似度矩阵（如果评分或好友信息中无该用户，则无该列，认定为0）
+在上层，sort调用了predict，借助prediction对所有的项目进行评分，最后依据项目预测评分排序
+注：目前的相似度矩阵存在优化空间，正在优化，但是不影响预测与排序（因为相似度矩阵是计算加载分离的）
+**运行 src/rec/sort 函数既可以进行协同过滤排序**
