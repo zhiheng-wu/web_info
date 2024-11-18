@@ -2,9 +2,9 @@
 ## 环境
 平台：windows
 python 3.8.20
-![alt text](others/11.png)
-![alt text](others/12.png)
-![alt text](others/13.png)
+![alt text](./others/11.png)
+![alt text](./others/12.png)
+![alt text](./others/13.png)
 ## sec1
 对数据进行处理
 ### 分词
