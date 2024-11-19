@@ -35,5 +35,5 @@ def read_ratings(filename, type):
     ratings = ratings.drop_duplicates(subset=['User', mode], keep='first')
     # 构建评分矩阵
     ratings_matrix = ratings.pivot(index='User', columns=mode, values='Rate')
-    ratings_matrix = ratings_matrix.fillna(0)
+    ratings_matrix = ratings_matrix.fillna(-1)
     return ratings_matrix
