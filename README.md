@@ -160,7 +160,7 @@ get_similarity计算了所有用户的相似度矩阵（如果评分或好友信
 
 数据过大，放在网盘中
 
-网盘地址：链接：https://rec.ustc.edu.cn/share/bbce9e60-a753-11ef-99fa-7f0007cc6fee密码：roa7
+网盘地址：链接：https://rec.ustc.edu.cn/share/bbce9e60-a753-11ef-99fa-7f0007cc6fee  密码：roa7
 
 文件夹内容：
 
