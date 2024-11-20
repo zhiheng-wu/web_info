@@ -64,6 +64,8 @@ def rank(type):
                 continue
             predicting['true'].append(value)
             predicting['pred'].append(_predict_rating(user_id, str(item_id), similarity_matrix ,train_data, 5))
+        if len(predicting['true']) < 2  or len(predicting['pred']) < 2:
+            continue
         ndcgs.append(compute_ndcg(predicting))
         predicting['true'].clear()
         predicting['pred'].clear()
@@ -72,10 +74,9 @@ def rank(type):
         print("Movie")
     else:            
         print("Book")   
-    print("NDCG: ", ndcg)
+    print("NDCG: ", str(ndcg))
     return
 
 if __name__ == '__main__':
-    rank(0)
     rank(1)
 
