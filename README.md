@@ -5,6 +5,7 @@ python 3.8.20
 ![alt text](./others/11.png)
 ![alt text](./others/12.png)
 ![alt text](./others/13.png)
+注：项目中的data文件并不准确，这是由于数据集文件过大，如有需要可在最后查看数据集文件网盘链接
 ## sec1
 对数据进行处理
 ### 分词
